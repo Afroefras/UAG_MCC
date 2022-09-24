@@ -1,8 +1,6 @@
 from random import sample, randint
-from re import T
 from pandas import DataFrame, concat
-
-from matplotlib.pyplot import subplots, plot, title, show
+from matplotlib.pyplot import subplots, show
 
 from IPython.display import clear_output
 
@@ -116,9 +114,9 @@ class AgenteViajero:
 
 
     def plot_cities(self) -> None:
-        self.cit_x, self.cit_y = [*zip(*self.cit_coor)]
-
         self.fig, self.axes = subplots(nrows=1, ncols=2, figsize=(10, 5))
+
+        self.cit_x, self.cit_y = [*zip(*self.cit_coor)]
         self.axes[0].scatter(self.cit_x, self.cit_y)
 
 
@@ -136,26 +134,33 @@ class AgenteViajero:
             self.connectpoints(city, **kwargs)
 
 
-    def train(self) -> None:
+    def plot_distance(self, train_history: list) -> None:
+        self.axes[1].set_xlim([0,100])
+        acum_dist = [x[-1] for x in train_history]
+        self.axes[1].plot(acum_dist)
+        distance = f'Distance: {acum_dist[-1]:.2f}'
+        self.axes[1].set_title(distance)
+
+    def train(self, tournaments_size: float, verbose: bool) -> None:
         self.create_population()
 
         train_history = []
         for i in range(self.n_gen):
-            top_cities, top_dist = self.n_tournaments(tournament_size_q=0.2)
+            top_cities, top_dist = self.n_tournaments(tournament_size_q=tournaments_size)
             top_route = [(top_cities[i], top_cities[i+1]) for i in range(len(top_cities)-1)]
             train_history.append((top_cities, top_route, top_dist))
             
-            clear_output(wait=True)
-            self.plot_route(route=top_route, line_color='blue', n_gen=i+1)
-
-            self.axes[1].set_xlim([0,100])
-            acum_dist = [x[-1] for x in train_history]
-            self.axes[1].plot(acum_dist)
-
-            distance = f'Distance: {top_dist:.2f}'
-            self.axes[1].set_title(distance)
-            show()
+            if verbose:
+                clear_output(wait=True)
+                self.plot_route(route=top_route, line_color='blue', n_gen=i+1)
+                self.plot_distance(train_history)
+                show()
 
             self.new_population()
 
         self.result = DataFrame(train_history, columns=['top_cities', 'top_route', 'top_dist'])
+
+        if not verbose:
+            self.plot_route(route=train_history[-1][1], line_color='blue', n_gen=self.n_gen)
+            self.plot_distance(train_history)
+            show()
