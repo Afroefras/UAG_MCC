@@ -18,7 +18,11 @@ class AgenteViajero:
             indiv = sample(self.cit_name, self.cit_len)
             self.population.append(indiv)
 
-        self.df = DataFrame(self.population, columns=[f'city_{x}' for x in self.cit_name])
+        self.to_dataframe()
+
+
+    def to_dataframe(self) -> None:
+        self.df = DataFrame(self.population, columns=self.cit_name)
 
 
     def calculate_distance(self, p: tuple, q: tuple) -> float:
@@ -29,7 +33,7 @@ class AgenteViajero:
         return dist
 
     
-    def aptitude_func(self, chromosone: list) -> None:
+    def aptitude_func(self, chromosone: list) -> float:
         coord = [self.cit_dict[x] for x in chromosone]
         len_coord = len(coord)
 
@@ -40,7 +44,7 @@ class AgenteViajero:
         return aptitude_result
 
 
-    def get_all_dist(self) -> list:
+    def get_all_dist(self) -> None:
         all_dist = []
         for chromosone in self.population:
             aptitude_result = self.aptitude_func(chromosone)
@@ -51,16 +55,30 @@ class AgenteViajero:
 
     def single_tournament(self, q: float) -> DataFrame:
         sample_q = self.df.sample(frac=q).copy()
-        sample_q.sort_values(by='dist', ascending=False, inplace=True)
+        sample_q.sort_values(by='dist', ascending=True, inplace=True)
         winner = sample_q.iloc[:1,-1:].reset_index()
         return winner
 
 
-    def n_tournaments(self, tournament_size_q: float) -> DataFrame:
+    def n_tournaments(self, tournament_size_q: float) -> list:
         self.winners = DataFrame()
         for _ in range(self.pop_size):
             winner = self.single_tournament(q=tournament_size_q)
             self.winners = concat([self.winners, winner], axis=0)
+
+        self.winners.sort_values('dist', ascending=True, inplace=True)
+        top_winner = self.winners.iloc[0,0]
+        top_dist = self.winners.iloc[0,-1]
+
+        top_route_cities = self.df.loc[top_winner, :]
+        top_route_cities = top_route_cities.iloc[:-1].tolist()
+        top_route = [self.cit_dict[x] for x in top_route_cities]
+
+        self.winners.drop('dist', axis=1, inplace=True)
+        self.winners.set_index('index', inplace=True)
+        self.winners = self.winners.join(self.df.iloc[:, :-1])
+
+        return top_route, top_dist
 
 
     def inversion_reprod(self, prev_winner: list) -> list:
@@ -68,12 +86,12 @@ class AgenteViajero:
         if to_keep==0: parent = prev_winner[1:]
         else: parent = prev_winner[:-1]
 
-        first_point = randint(0, len(parent) - 1)
-        end_point = randint(first_point + 1, len(parent))
+        first_point = randint(0, len(parent) - 2)
+        end_point = randint(first_point + 2, len(parent))
 
         fragment = parent[first_point:end_point]
         inversion = fragment[::-1]
-        
+
         child = parent[:first_point] + inversion + parent[end_point:]
 
         if to_keep==0: return prev_winner[:1] + child
@@ -81,21 +99,26 @@ class AgenteViajero:
 
 
     def new_population(self) -> None:
-        pass
+        self.population = []
 
-cities = [
-    (1,3), (2,5), (2,7), (4,2), (4,4), 
-    # (4,7), (4,8), (5,3), (6,1), (6,6), 
-    # (7,8), (8,2), (8,7), (9,3), (10,7), 
-    # (11,1), (11,4), (11,6), (12,7), (13,5),
-]
+        winners_list = self.winners.values.tolist()
+        for to_reprod in winners_list:
+            reprod = self.inversion_reprod(to_reprod)
+            self.population.append(reprod)
 
-av = AgenteViajero(cities, population_size=10, n_generations=2)
-av.create_population()
-# av.get_all_dist()
-# av.n_tournaments(tournament_size_q=0.5)
+        self.to_dataframe()
 
-# print('\nPopulation: ', av.population)
-# print('\nDistances: ', av.df)
-# print('\nPopulation: ', av.df.shape, av.df)
-print(av.population[0],'\n\n',av.inversion_reprod(av.population[0]))
+
+    def train(self) -> None:
+        self.create_population()
+        self.get_all_dist()
+
+        train_history = []
+        for _ in range(self.n_gen):
+            top_route, top_dist = self.n_tournaments(tournament_size_q=0.2)
+            train_history.append((top_route, top_dist))
+
+            self.new_population()
+            self.get_all_dist()
+
+        self.result = DataFrame(train_history, columns=['top_route', 'top_dist'])
