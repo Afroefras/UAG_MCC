@@ -88,8 +88,8 @@ class AgenteViajero:
         if to_keep==0: parent = prev_winner[1:]
         else: parent = prev_winner[:-1]
 
-        first_point = randint(0, len(parent) - 2)
-        end_point = randint(first_point + 2, len(parent))
+        first_point = randint(0, len(parent) - 1)
+        end_point = randint(first_point + 1, len(parent))
 
         fragment = parent[first_point:end_point]
         inversion = fragment[::-1]
@@ -136,8 +136,11 @@ class AgenteViajero:
 
     def plot_distance(self, train_history: list) -> None:
         self.axes[1].set_xlim([0,100])
+        self.axes[1].set_ylim([0, train_history[0][-1]*1.1])
+
         acum_dist = [x[-1] for x in train_history]
         self.axes[1].plot(acum_dist)
+
         distance = f'Distance: {acum_dist[-1]:.2f}'
         self.axes[1].set_title(distance)
 
