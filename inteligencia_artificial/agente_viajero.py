@@ -1,5 +1,10 @@
 from random import sample, randint
+from re import T
 from pandas import DataFrame, concat
+
+from matplotlib.pyplot import axes, plot, title, show
+
+from IPython.display import clear_output
 
 class AgenteViajero:
     def __init__(self, cities_coordinates: list, population_size: int, n_generations: int) -> None:
@@ -110,14 +115,40 @@ class AgenteViajero:
         self.get_all_dist()
 
 
+    def plot_cities(self) -> None:
+        self.cit_x, self.cit_y = [*zip(*self.cit_coor)]
+        self.ax_cities = axes()
+        self.ax_cities.scatter(self.cit_x, self.cit_y)
+
+
+    def connectpoints(self, point: tuple, line_color: str) -> None:
+        x1, x2 = self.cit_x[point[0]], self.cit_x[point[-1]]
+        y1, y2 = self.cit_y[point[0]], self.cit_y[point[-1]]
+        plot([x1, x2],[y1, y2], c=line_color)
+
+    
+    def plot_route(self, route: list, distance: float, line_color: str) -> None:
+        self.plot_cities()
+        
+        distance = f'Distance: {distance:.2f}'
+        title(distance)
+        for city in route:
+            self.connectpoints(city, line_color=line_color)
+        show()
+
+
     def train(self) -> None:
         self.create_population()
 
         train_history = []
         for _ in range(self.n_gen):
             top_cities, top_dist = self.n_tournaments(tournament_size_q=0.2)
-            train_history.append((top_cities, top_dist))
+            top_route = [(top_cities[i], top_cities[i+1]) for i in range(len(top_cities)-1)]
+            train_history.append((top_cities, top_route, top_dist))
+            
+            clear_output(wait=True)
+            self.plot_route(route=top_route, distance=top_dist, line_color='blue') 
 
             self.new_population()
 
-        self.result = DataFrame(train_history, columns=['top_cities', 'top_dist'])
+        self.result = DataFrame(train_history, columns=['top_cities', 'top_route', 'top_dist'])
