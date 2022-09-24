@@ -1,13 +1,15 @@
-from random import sample, randint
 from pandas import DataFrame, concat
-from matplotlib.pyplot import subplots, show
+from random import sample, randint, choice
 
 from IPython.display import clear_output
+from matplotlib.pyplot import subplots, show
+
 
 class AgenteViajero:
-    def __init__(self, cities_coordinates: list, population_size: int, n_generations: int) -> None:
+    def __init__(self, cities_coordinates: list, population_size: int, n_generations: int, tournament_size: float) -> None:
         self.n_gen = n_generations
         self.pop_size = population_size
+        self.tournament_size = tournament_size
 
         self.cit_coor = cities_coordinates
         self.cit_len = len(self.cit_coor)
@@ -64,10 +66,10 @@ class AgenteViajero:
         return winner
 
 
-    def n_tournaments(self, tournament_size_q: float) -> list:
+    def n_tournaments(self) -> list:
         self.winners = DataFrame()
         for _ in range(self.pop_size):
-            winner = self.single_tournament(q=tournament_size_q)
+            winner = self.single_tournament(q=self.tournament_size)
             self.winners = concat([self.winners, winner], axis=0)
 
         self.winners.sort_values('dist', ascending=True, inplace=True)
@@ -102,6 +104,8 @@ class AgenteViajero:
 
 
     def castling_reprod(self, parent: list) -> list:
+        if randint(1,10)==1: return parent
+
         first_point = randint(0, len(parent) - 2)
 
         max_len_to_switch = len(parent[first_point:]) // 2
@@ -120,7 +124,7 @@ class AgenteViajero:
         return child
 
 
-    def new_population(self, reprod_func: function) -> None:
+    def new_population(self, reprod_func) -> None:
         self.population = []
 
         just_cities = self.winners.iloc[:, 1:].copy()
@@ -165,12 +169,12 @@ class AgenteViajero:
         self.axes[1].set_title(distance)
 
 
-    def train(self, tournaments_size: float, reprod_func: function, verbose: bool) -> None:
+    def train(self, reprod_functions: list, verbose: bool) -> None:
         self.create_population()
 
         train_history = []
         for i in range(self.n_gen):
-            top_cities, top_dist = self.n_tournaments(tournament_size_q=tournaments_size)
+            top_cities, top_dist = self.n_tournaments()
             top_route = [(top_cities[i], top_cities[i+1]) for i in range(len(top_cities)-1)]
             train_history.append((top_cities, top_route, top_dist))
             
@@ -180,6 +184,7 @@ class AgenteViajero:
                 self.plot_distance(train_history)
                 show()
 
+            reprod_func = choice(reprod_functions)
             self.new_population(reprod_func=reprod_func)
 
         self.result = DataFrame(train_history, columns=['top_cities', 'top_route', 'top_dist'])
