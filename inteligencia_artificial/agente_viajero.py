@@ -19,6 +19,7 @@ class AgenteViajero:
             self.population.append(indiv)
 
         self.to_dataframe()
+        self.get_all_dist()
 
 
     def to_dataframe(self) -> None:
@@ -56,7 +57,7 @@ class AgenteViajero:
     def single_tournament(self, q: float) -> DataFrame:
         sample_q = self.df.sample(frac=q).copy()
         sample_q.sort_values(by='dist', ascending=True, inplace=True)
-        winner = sample_q.iloc[:1,-1:].reset_index()
+        winner = sample_q.iloc[:1,:].reset_index()
         return winner
 
 
@@ -70,15 +71,13 @@ class AgenteViajero:
         top_winner = self.winners.iloc[0,0]
         top_dist = self.winners.iloc[0,-1]
 
-        top_route_cities = self.df.loc[top_winner, :]
-        top_route_cities = top_route_cities.iloc[:-1].tolist()
-        top_route = [self.cit_dict[x] for x in top_route_cities]
+        top_cities = self.df.loc[top_winner, :]
+        top_cities = top_cities.iloc[:-1].tolist()
+        top_cities = [int(x) for x in top_cities]
 
         self.winners.drop('dist', axis=1, inplace=True)
-        self.winners.set_index('index', inplace=True)
-        self.winners = self.winners.join(self.df.iloc[:, :-1])
 
-        return top_route, top_dist
+        return top_cities, top_dist
 
 
     def inversion_reprod(self, prev_winner: list) -> list:
@@ -101,24 +100,24 @@ class AgenteViajero:
     def new_population(self) -> None:
         self.population = []
 
-        winners_list = self.winners.values.tolist()
+        just_cities = self.winners.iloc[:, 1:].copy()
+        winners_list = just_cities.values.tolist()
         for to_reprod in winners_list:
             reprod = self.inversion_reprod(to_reprod)
             self.population.append(reprod)
 
         self.to_dataframe()
+        self.get_all_dist()
 
 
     def train(self) -> None:
         self.create_population()
-        self.get_all_dist()
 
         train_history = []
         for _ in range(self.n_gen):
-            top_route, top_dist = self.n_tournaments(tournament_size_q=0.2)
-            train_history.append((top_route, top_dist))
+            top_cities, top_dist = self.n_tournaments(tournament_size_q=0.2)
+            train_history.append((top_cities, top_dist))
 
             self.new_population()
-            self.get_all_dist()
 
-        self.result = DataFrame(train_history, columns=['top_route', 'top_dist'])
+        self.result = DataFrame(train_history, columns=['top_cities', 'top_dist'])
