@@ -100,13 +100,33 @@ class AgenteViajero:
         else: return child + prev_winner[-1:]
 
 
-    def new_population(self) -> None:
+
+    def castling_reprod(self, parent: list) -> list:
+        first_point = randint(0, len(parent) - 2)
+
+        max_len_to_switch = len(parent[first_point:]) // 2
+        len_to_switch = randint(1, max_len_to_switch)        
+
+        first_point_end = first_point + len_to_switch
+
+        end_point = randint(first_point_end, len(parent) - len_to_switch)
+        end_point_end = end_point + len_to_switch
+
+        child = parent[:first_point] 
+        child += parent[end_point:end_point_end]
+        child += parent[first_point_end:end_point]
+        child += parent[first_point:first_point_end]
+        child += parent[end_point_end:]
+        return child
+
+
+    def new_population(self, reprod_func: function) -> None:
         self.population = []
 
         just_cities = self.winners.iloc[:, 1:].copy()
         winners_list = just_cities.values.tolist()
         for to_reprod in winners_list:
-            reprod = self.inversion_reprod(to_reprod)
+            reprod = reprod_func(to_reprod)
             self.population.append(reprod)
 
         self.to_dataframe()
@@ -144,7 +164,8 @@ class AgenteViajero:
         distance = f'Distance: {acum_dist[-1]:.2f}'
         self.axes[1].set_title(distance)
 
-    def train(self, tournaments_size: float, verbose: bool) -> None:
+
+    def train(self, tournaments_size: float, reprod_func: function, verbose: bool) -> None:
         self.create_population()
 
         train_history = []
@@ -159,7 +180,7 @@ class AgenteViajero:
                 self.plot_distance(train_history)
                 show()
 
-            self.new_population()
+            self.new_population(reprod_func=reprod_func)
 
         self.result = DataFrame(train_history, columns=['top_cities', 'top_route', 'top_dist'])
 
