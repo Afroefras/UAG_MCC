@@ -179,9 +179,9 @@ class AgenteViajero:
             train_history.append((top_cities, top_route, top_dist))
             
             if verbose:
-                clear_output(wait=True)
                 self.plot_route(route=top_route, line_color='blue', n_gen=i+1)
                 self.plot_distance(train_history)
+                clear_output(wait=True)
                 show()
 
             reprod_func = choice(reprod_functions)
