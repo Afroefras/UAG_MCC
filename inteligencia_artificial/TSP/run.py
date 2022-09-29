@@ -1,42 +1,49 @@
-from train import TrainTSP
-from matplotlib.pyplot import subplots
+from train import TSP
 
-class TSP(TrainTSP):
+from matplotlib.pyplot import subplots, show
+from matplotlib.animation import ArtistAnimation
+
+
+
+class PlotTSP(TSP):
     def __init__(self, cities_coordinates: list, population_size: int, n_generations: int, tournament_size: float) -> None:
         super().__init__(cities_coordinates, population_size, n_generations, tournament_size)
 
-    def plot_cities(self) -> None:
-        self.fig, self.axes = subplots(nrows=1, ncols=2, figsize=(10, 5))
+        self.train(reprod_functions=[self.inversion_reprod, self.castling_reprod])
 
+        self.fig, self.axes = subplots(nrows=1, ncols=2)
         self.cit_x, self.cit_y = [*zip(*self.cit_coor)]
-        self.axes[0].scatter(self.cit_x, self.cit_y)
+        self.axes[1].set_xlim([0, self.n_gen])
 
 
-    def connectpoints(self, point: tuple, line_color: str, n_gen: int) -> None:
+    def plot_cities(self, **kwargs) -> None:
+        self.axes[0].scatter(self.cit_x, self.cit_y, **kwargs)
+        
+
+    def connectpoints(self, point: tuple, **kwargs) -> None:
         x1, x2 = self.cit_x[point[0]], self.cit_x[point[-1]]
         y1, y2 = self.cit_y[point[0]], self.cit_y[point[-1]]
+        self.axes[0].plot([x1, x2],[y1, y2], **kwargs)
 
-        self.axes[0].plot([x1, x2],[y1, y2], c=line_color)
-        self.axes[0].set_title(f'Best route, gen #{n_gen}')
 
-    
-    def plot_route(self, route: list, **kwargs) -> None:
-        self.plot_cities()    
+    def plot_route(self, route: list, n_gen: int, **kwargs) -> None:
         for city in route:
             self.connectpoints(city, **kwargs)
+        self.axes[0].set_title(f'Best route, gen #{n_gen}')
 
 
-    def plot_distance(self, train_history: list) -> None:
-        self.axes[1].set_xlim([0,100])
-        self.axes[1].set_ylim([0, train_history[0][-1]*1.1])
+    def plot_distance(self, distance_history: list) -> None:
+        self.axes[1].plot(distance_history)
 
-        acum_dist = [x[-1] for x in train_history]
-        self.axes[1].plot(acum_dist)
-
-        distance = f'Distance: {acum_dist[-1]:.2f}'
+        top_dist = list(distance_history)[-1]
+        distance = f'Distance: {top_dist:.2f}'
         self.axes[1].set_title(distance)
 
 
+    def plot_tsp(self, i, **kwargs) -> None:
+        self.plot_cities(c='red')
+        self.plot_route(route=self.result['route'][i], n_gen=i+1, **kwargs)
+        self.plot_distance(distance_history=self.result['distance'][:i+1])
 
 
 cities = [
@@ -46,6 +53,11 @@ cities = [
     (11,1), (11,4), (11,6), (12,7), (13,5),
 ]
 
-t = TSP(cities_coordinates=cities, population_size=10, n_generations=10, tournament_size=0.5)
-result = t.train(reprod_functions=[t.inversion_reprod])
-print(result)
+tsp = PlotTSP(cities_coordinates=cities, population_size=10, n_generations=10, tournament_size=0.5)
+
+ims = []
+for i in range(tsp.n_gen):
+    ims.append((tsp.plot_tsp(i, c='blue'),))
+
+im_ani = ArtistAnimation(tsp.fig, ims, interval=50, repeat_delay=3000, blit=True)
+show()

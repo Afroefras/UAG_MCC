@@ -1,7 +1,7 @@
 from pandas import DataFrame, concat
 from random import sample, randint, choice
 
-class TrainTSP:
+class TSP:
     def __init__(self, cities_coordinates: list, population_size: int, n_generations: int, tournament_size: float) -> None:
         self.n_gen = n_generations
         self.pop_size = population_size
@@ -149,4 +149,4 @@ class TrainTSP:
             reprod_func = choice(reprod_functions)
             self.new_population(reprod_func=reprod_func)
 
-        return DataFrame(train_history, columns=['cities', 'route', 'distance'])
+        self.result = DataFrame(train_history, columns=['cities', 'route', 'distance'])

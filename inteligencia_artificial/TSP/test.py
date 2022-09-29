@@ -1,52 +1,16 @@
-import math
+from numpy import arange, hypot
+from matplotlib.pyplot import Normalize, figure, pcolor, show
+from matplotlib.animation import ArtistAnimation
 
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+fig2 = figure()
 
+x = arange(-9, 10)
+y = arange(-9, 10).reshape(-1, 1)
+base = hypot(x, y)
+ims = []
+for add in arange(15):
+    ims.append((pcolor(x, y, base + add, norm=Normalize(0, 30)),))
 
-def beta_pdf(x, a, b):
-    return (x**(a-1) * (1-x)**(b-1) * math.gamma(a + b)
-            / (math.gamma(a) * math.gamma(b)))
+im_ani = ArtistAnimation(fig2, ims, interval=50, repeat_delay=3000, blit=True)
 
-
-class UpdateDist:
-    def __init__(self, ax, prob=0.5):
-        self.success = 0
-        self.prob = prob
-        self.line, = ax.plot([], [], 'k-')
-        self.x = np.linspace(0, 1, 200)
-        self.ax = ax
-
-        # Set up plot parameters
-        self.ax.set_xlim(0, 1)
-        self.ax.set_ylim(0, 10)
-        self.ax.grid(True)
-
-        # This vertical line represents the theoretical value, to
-        # which the plotted distribution should converge.
-        self.ax.axvline(prob, linestyle='--', color='black')
-
-    def __call__(self, i):
-        # This way the plot can continuously run and we just keep
-        # watching new realizations of the process
-        if i == 0:
-            self.success = 0
-            self.line.set_data([], [])
-            return self.line,
-
-        # Choose success based on exceed a threshold with a uniform pick
-        if np.random.rand(1,) < self.prob:
-            self.success += 1
-        y = beta_pdf(self.x, self.success + 1, (i - self.success) + 1)
-        self.line.set_data(self.x, y)
-        return self.line,
-
-# Fixing random state for reproducibility
-np.random.seed(19680801)
-
-
-fig, ax = plt.subplots()
-ud = UpdateDist(ax, prob=0.7)
-anim = FuncAnimation(fig, ud, frames=100, interval=100, blit=True)
-plt.show()
+show()
