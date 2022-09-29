@@ -1,4 +1,4 @@
-from agente_viajero_01train import TrainTSP
+from TSP_01train import TrainTSP
 from matplotlib.pyplot import subplots
 
 class TSP(TrainTSP):
