@@ -1,11 +1,7 @@
 from pandas import DataFrame, concat
 from random import sample, randint, choice
 
-from IPython.display import clear_output
-from matplotlib.pyplot import subplots, show
-
-
-class AgenteViajero:
+class TrainTSP:
     def __init__(self, cities_coordinates: list, population_size: int, n_generations: int, tournament_size: float) -> None:
         self.n_gen = n_generations
         self.pop_size = population_size
@@ -102,7 +98,6 @@ class AgenteViajero:
         else: return child + prev_winner[-1:]
 
 
-
     def castling_reprod(self, parent: list) -> list:
         if randint(1,10)==1: return parent
 
@@ -137,63 +132,21 @@ class AgenteViajero:
         self.get_all_dist()
 
 
-    def plot_cities(self) -> None:
-        self.fig, self.axes = subplots(nrows=1, ncols=2, figsize=(10, 5))
-
-        self.cit_x, self.cit_y = [*zip(*self.cit_coor)]
-        self.axes[0].scatter(self.cit_x, self.cit_y)
-
-
-    def connectpoints(self, point: tuple, line_color: str, n_gen: int) -> None:
-        x1, x2 = self.cit_x[point[0]], self.cit_x[point[-1]]
-        y1, y2 = self.cit_y[point[0]], self.cit_y[point[-1]]
-
-        self.axes[0].plot([x1, x2],[y1, y2], c=line_color)
-        self.axes[0].set_title(f'Best route, gen #{n_gen}')
-
-    
-    def plot_route(self, route: list, **kwargs) -> None:
-        self.plot_cities()    
-        for city in route:
-            self.connectpoints(city, **kwargs)
-
-
-    def plot_distance(self, train_history: list) -> None:
-        self.axes[1].set_xlim([0,100])
-        self.axes[1].set_ylim([0, train_history[0][-1]*1.1])
-
-        acum_dist = [x[-1] for x in train_history]
-        self.axes[1].plot(acum_dist)
-
-        distance = f'Distance: {acum_dist[-1]:.2f}'
-        self.axes[1].set_title(distance)
-
-
     def create_route(self, cities: list) -> None:
         return [(cities[i], cities[i+1]) for i in range(len(cities)-1)]
 
 
-    def train(self, reprod_functions: list, verbose: bool) -> None:
+    def train(self, reprod_functions: list) -> None:
         self.create_population()
 
         train_history = []
-        for i in range(self.n_gen):
+        for _ in range(self.n_gen):
             top_cities, top_dist = self.n_tournaments()
+
             top_route = self.create_route(top_cities)
             train_history.append((top_cities, top_route, top_dist))
-            
-            if verbose:
-                self.plot_route(route=top_route, line_color='blue', n_gen=i+1)
-                self.plot_distance(train_history)
-                clear_output(wait=True)
-                show()
-
+        
             reprod_func = choice(reprod_functions)
             self.new_population(reprod_func=reprod_func)
 
-        self.result = DataFrame(train_history, columns=['top_cities', 'top_route', 'top_dist'])
-
-        if not verbose:
-            self.plot_route(route=train_history[-1][1], line_color='blue', n_gen=self.n_gen)
-            self.plot_distance(train_history)
-            show()
+        return DataFrame(train_history, columns=['cities', 'route', 'distance'])
