@@ -1,4 +1,4 @@
-from TSP_01train import TrainTSP
+from train import TrainTSP
 from matplotlib.pyplot import subplots
 
 class TSP(TrainTSP):
@@ -35,6 +35,9 @@ class TSP(TrainTSP):
 
         distance = f'Distance: {acum_dist[-1]:.2f}'
         self.axes[1].set_title(distance)
+
+
+
 
 cities = [
     (1,3), (2,5), (2,7), (4,2), (4,4), 
