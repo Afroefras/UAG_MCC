@@ -169,13 +169,17 @@ class AgenteViajero:
         self.axes[1].set_title(distance)
 
 
+    def create_route(self, cities: list) -> None:
+        return [(cities[i], cities[i+1]) for i in range(len(cities)-1)]
+
+
     def train(self, reprod_functions: list, verbose: bool) -> None:
         self.create_population()
 
         train_history = []
         for i in range(self.n_gen):
             top_cities, top_dist = self.n_tournaments()
-            top_route = [(top_cities[i], top_cities[i+1]) for i in range(len(top_cities)-1)]
+            top_route = self.create_route(top_cities)
             train_history.append((top_cities, top_route, top_dist))
             
             if verbose:
