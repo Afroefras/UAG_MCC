@@ -28,7 +28,7 @@ tsp.train(reprod_functions=[
 # Gráfica
 anim = FuncAnimation(
     tsp.fig, 
-    lambda x: tsp.plot_tsp(x, c='red'),
+    lambda x: tsp.plot_tsp(x, color=(0.1, 0.2, 0.5)),
     frames=tsp.n_gen,
     interval=100,
     repeat=False,

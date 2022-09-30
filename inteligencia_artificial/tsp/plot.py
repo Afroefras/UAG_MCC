@@ -8,8 +8,8 @@ class PlotTSP(TSP):
         self.set_plot_env()
 
 
-    def plot_cities(self, **kwargs) -> None:
-        self.axes[0].scatter(self.cit_x, self.cit_y, **kwargs)
+    def plot_cities(self) -> None:
+        self.axes[0].scatter(self.cit_x, self.cit_y, c='red')
         
 
     def connectpoints(self, point: tuple, **kwargs) -> None:
@@ -23,7 +23,7 @@ class PlotTSP(TSP):
 
         self.axes[0].set_title(f'Best route at gen #{i+1}')
 
-        self.plot_cities(**kwargs)
+        self.plot_cities()
 
         route = self.result['route'][i]
         for city in route:
@@ -47,7 +47,7 @@ class PlotTSP(TSP):
 
 
     def set_plot_env(self) -> None:
-        self.fig, self.axes = subplots(nrows=1, ncols=2)
+        self.fig, self.axes = subplots(nrows=1, ncols=2, figsize=(10,5))
         self.cit_x, self.cit_y = [*zip(*self.cit_coor)]
 
         self.dist_x, self.dist_y = [], []
