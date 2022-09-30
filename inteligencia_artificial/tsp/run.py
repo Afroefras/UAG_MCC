@@ -11,6 +11,7 @@ cities = [
     (11,1), (11,4), (11,6), (12,7), (13,5),
 ]
 
+print('\nIniciando ...')
 # Parámetros
 tsp = PlotTSP(
     cities_coordinates=cities,
@@ -20,9 +21,10 @@ tsp = PlotTSP(
 )
 
 # Entrenamiento
+print('\nEntrenando ...')
 tsp.train(reprod_functions=[
     tsp.inversion_reprod, 
-    # tsp.castling_reprod,
+    tsp.castling_reprod,
 ])
 
 # Gráfica
@@ -30,7 +32,7 @@ anim = FuncAnimation(
     tsp.fig, 
     lambda x: tsp.plot_tsp(x, color=(0.1, 0.2, 0.5)),
     frames=tsp.n_gen,
-    interval=100,
+    interval=300,
     repeat=False,
 )
 show()

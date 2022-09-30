@@ -31,6 +31,9 @@ class PlotTSP(TSP):
 
 
     def plot_distance(self, i: int, **kwargs) -> None:
+        min_dist = self.result['distance'][self.n_gen-1]
+        max_dist = self.result['distance'][0]
+
         top_dist = self.result['distance'][i]
         distance = f'Distance: {top_dist:.2f}'
 
@@ -41,7 +44,7 @@ class PlotTSP(TSP):
 
         self.axes[1].set_title(distance)
         self.axes[1].set_xlim([0, self.n_gen])
-        self.axes[1].set_ylim([0, self.result['distance'][0]])
+        self.axes[1].set_ylim([min_dist*0.9, max_dist])
 
         self.axes[1].plot(self.dist_x, self.dist_y, **kwargs)
 
