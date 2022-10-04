@@ -27,8 +27,8 @@ tsp = PlotTSP(
 # Entrenamiento
 print('\nEntrenando ...')
 tsp.train(reprod_functions=[
-    tsp.inversion_reprod, 
-    tsp.castling_reprod,
+    tsp.inversion_reprod,
+    # tsp.castling_reprod,
 ])
 
 ##########################################################
