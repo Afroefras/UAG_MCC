@@ -1,10 +1,8 @@
-# Entorno
-from plot import PlotTSP
+from plot_tsp import PlotTSP
 
 from matplotlib.pyplot import show
 from matplotlib.animation import FuncAnimation
 
-##########################################################
 # Coordenadas
 cities = [
     (1,3), (2,5), (2,7), (4,2), (4,4), 
@@ -13,8 +11,6 @@ cities = [
     (11,1), (11,4), (11,6), (12,7), (13,5),
 ]
 
-##########################################################
-print('\nIniciando ...')
 # Parámetros
 tsp = PlotTSP(
     cities_coordinates=cities,
@@ -23,21 +19,18 @@ tsp = PlotTSP(
     tournament_size=0.07,
 )
 
-##########################################################
 # Entrenamiento
-print('\nEntrenando ...')
 tsp.train(reprod_functions=[
-    tsp.inversion_reprod,
+    tsp.inversion_reprod, 
     # tsp.castling_reprod,
 ])
 
-##########################################################
 # Gráfica
 anim = FuncAnimation(
     tsp.fig, 
-    lambda x: tsp.plot_tsp(x, color=(0.1, 0.2, 0.5)),
+    lambda x: tsp.plot_tsp(x, c='red'),
     frames=tsp.n_gen,
-    interval=150,
+    interval=50,
     repeat=False,
 )
 show()
