@@ -1,4 +1,4 @@
-from train import TSP
+from train_tsp import TSP
 
 from matplotlib.pyplot import subplots
 
