@@ -2,53 +2,67 @@ from math import sin, cos
 
 
 from re import findall
-from random import randint
+from numpy import argmin
+from random import randint, sample
 from string import ascii_uppercase
 
 class CurveAdjust:
-    def __init__(self, population_size: int, range_considered) -> None:
+    def __init__(self, population_size: int, tournament_size: float, range_considered) -> None:
         self.pop_size = population_size
-        self.func_range = range_considered
+        self.n_players = int(self.pop_size*tournament_size)
+        self.func_range = list(range_considered)
         
         self.get_function()
-        self.get_variables()
+        self.get_coef()
         self.get_actual_values()
-        self.create_population()
+        self.actual_curve_values()
 
 
     def get_function(self) -> None:
-        # self.func_string = input('\nTomando en cuenta las siguientes consideraciones:\n\t- "x" indica el valor del eje x\n\t- Cada variable a buscar debe estar representada por una letra mayúscula entre comillas dobles, ejemplo:\n\t\t"A"*("B"*sin(x/"C") + "D"*cos(x/"E")) + "F"*x - "G"\nIngresa la función a evaluar:\n')
+        # self.func_string = input('\nTomando en cuenta las siguientes consideraciones:\n\t- "x" indica el valor del eje x\n\t- Cada coeficiente a buscar debe estar representada por una letra mayúscula entre comillas dobles, ejemplo:\n\t\t"A"*("B"*sin(x/"C") + "D"*cos(x/"E")) + "F"*x - "G"\nIngresa la función a evaluar:\n')
         self.func_string = '"A"*("B"*sin("x"/"C") + "D"*cos("x"/"E")) + "F"*"x" - "G"'
 
 
-    def get_variables(self) -> None:
+    def get_coef(self) -> None:
         upper_pattern = '|'.join(map(lambda x: f'"{x}"', ascii_uppercase))
-        found_vars = findall(upper_pattern, self.func_string)
-
-        self.all_vars = [x.replace('"','') for x in found_vars]
-        self.n_chrom = len(self.all_vars)
-
-        self.dict_vars = {x:i for i,x in enumerate(found_vars)}
+        self.all_coef = findall(upper_pattern, self.func_string)
+        self.n_chrom = len(self.all_coef)
 
 
     def get_actual_values(self) -> None:
-        self.all_values = {}
-        for _var, actual_value in zip(self.all_vars, (8, 25, 4, 45, 10, 17, 35)):
-            self.all_values[_var] = actual_value
-        # for _var in self.all_vars:
-            # actual_value = input(f'¿Cuál es el valor real de {_var}? ')
-            # self.all_values[_var] = actual_value
+        self.actual_values = {}
+        for _coef, actual_value in zip(self.all_coef, (8, 25, 4, 45, 10, 17, 35)):
+            self.actual_values[_coef.replace('"','')] = actual_value
+        # for _coef in self.all_coef:
+            # actual_value = input(f'¿Cuál es el valor real de {_coef}? ')
+            # self.actual_values[_coef.replace('"','')] = actual_value
         
     
-    def evaluate_function(self, chrom: list, x: int) -> float:
+    def function_to_eval(self, values_list: list) -> str:
         to_eval = self.func_string
-        for _keym, _value in self.dict_vars.items():
-            to_eval = to_eval.replace(_keym, f'chrom[{_value}]')
-
-        to_eval = to_eval.replace('"x"', str(x))
-        return eval(to_eval)
+        for _keym, _value in zip(self.all_coef, values_list):
+            to_eval = to_eval.replace(_keym, str(_value))
+        return to_eval
 
 
+    def evaluate_function(self, to_eval: str, x: int) -> float:
+        eval_at_x = to_eval.replace('"x"', str(x))
+        return eval(eval_at_x)
+
+    
+    def curve_values(self, values_list) -> list:
+        curve = []
+        func_with_coef = self.function_to_eval(values_list)
+        for x in self.func_range:
+            y = self.evaluate_function(func_with_coef, x)
+            curve.append(y)
+        return curve
+
+
+    def actual_curve_values(self) -> None:
+        self.actual_curve = self.curve_values(self.actual_values.values())
+
+    
     def create_population(self) -> None:
         self.population = []
         for _ in range(self.pop_size):
@@ -57,12 +71,54 @@ class CurveAdjust:
                 chrom.append(randint(1,255))
             self.population.append(chrom)
 
+        self.population_index = list(range(len(self.population)))
+
+    def get_population_curves(self) -> None:
+        self.pop_curves = []
+        for indiv in self.population:
+            self.pop_curves.append(self.curve_values(indiv))
+
+    
+    def get_abs_error(self, real_values: list, estimated_values: list) -> float:
+        abs_error = 0
+        for real, est in zip(real_values, estimated_values):
+            abs_error += abs(real-est)
+        return abs_error
+    
+
+    def all_abs_error(self) -> None:
+        self.pop_error = []
+        for indiv_curve in self.pop_curves:
+            abs_error = self.get_abs_error(self.actual_curve, indiv_curve)
+            self.pop_error.append(abs_error)
+
+
+    def single_tournament(self) -> tuple:
+        sample_indexes = sample(self.population_index, self.n_players)
+        sample_players = [self.population[x] for x in sample_indexes]
+        sample_curves = [self.pop_error[x] for x in sample_indexes]
+
+        min_index = argmin(sample_curves)
+        winner = sample_players[min_index]
+        return winner
 
 
 
 
-ca = CurveAdjust(population_size=10, range_considered=range(100))
-# print(ca.func_string)
-# print(ca.dict_vars)
-# print(ca.population)
-print(ca.evaluate_function((8, 25, 4, 45, 10, 17, 35), 60))
+            
+    def train(self) -> None:
+        self.create_population()
+        self.get_population_curves()
+        self.all_abs_error()
+
+ca = CurveAdjust(population_size=50, tournament_size=0.1, range_considered=range(0,100,50))
+# print(ca.n_players)
+# # print(ca.func_string)
+# # print(ca.dict_coef)
+# # print(ca.all_coef)
+# # print(ca.population)
+# # print(ca.actual_curve)
+
+ca.train()
+# print(ca.pop_error)
+ca.single_tournament()
