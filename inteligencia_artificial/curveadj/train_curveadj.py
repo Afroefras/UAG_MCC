@@ -74,6 +74,7 @@ class CurveAdjust:
 
         self.population_index = list(range(len(self.population)))
 
+
     def get_population_curves(self) -> None:
         self.pop_curves = []
         for indiv in self.population:
@@ -125,15 +126,59 @@ class CurveAdjust:
         return top_winner, top_error, top_index
 
     
-    def parent_reprod(self, parent_one: list, parent_two: list) -> list:
+    def parents_reprod(self, parent_one: list, parent_two: list, verbose: bool=False) -> tuple:
         cutoff_point = randint(0, 8*self.n_chrom)
         n_alleles = cutoff_point//8
+        split_allele = cutoff_point % 8
 
         child_one = parent_one[:n_alleles]
         child_two = parent_two[:n_alleles]
+        
+        complete_allele = 0
 
-        if cutoff_point % 8!=0:
-            pass
+        if split_allele != 0:
+            to_split_one = parent_one[n_alleles]
+            to_split_two = parent_two[n_alleles]
+
+            mask_one = (2**split_allele) - 1
+            mask_two = 255 - mask_one
+
+            upper_one = to_split_one & mask_one
+            upper_two = to_split_two & mask_one
+            lower_one = to_split_one & mask_two
+            lower_two = to_split_two & mask_two
+            child_one.append(lower_one | upper_two)
+            child_two.append(lower_two | upper_one)
+
+            complete_allele = 1
+
+        if verbose:
+            print('parent_one', parent_one)
+            print('parent_two', parent_two)
+            print('\ncutoff_point', cutoff_point)
+            print('n_alleles', n_alleles)
+            print('split_allele', split_allele)
+            print('\nchild_one', child_one)
+            print('child_two', child_two)
+            if split_allele != 0:
+                print('\nto_split_one', to_split_one, f"'{to_split_one:08b}")
+                print('to_split_two', to_split_two, f"'{to_split_two:08b}")
+                print('\nmask_one', mask_one, f"'{mask_one:08b}")
+                print('mask_two', mask_two, f"'{mask_two:08b}")
+                print('\nupper_one', upper_one, f"'{upper_one:08b}")
+                print('upper_two', upper_two, f"'{upper_two:08b}")
+                print('lower_one', lower_one, f"'{lower_one:08b}")
+                print('lower_two', lower_two, f"'{lower_two:08b}")
+                print('\nadd_to_child_one', lower_one | upper_two, f"'{lower_one | upper_two:08b}")
+                print('add_to_child_two', lower_two | upper_one, f"'{lower_two | upper_one:08b}")
+
+        child_one += parent_two[n_alleles + complete_allele:]
+        child_two += parent_one[n_alleles + complete_allele:]
+        if verbose:
+            print('\nchild_one', child_one)
+            print('child_two', child_two)
+
+        return child_one, child_two
 
 
     def train(self) -> None:
@@ -143,14 +188,14 @@ class CurveAdjust:
 
 ca = CurveAdjust(population_size=50, tournament_size=0.1, n_generations=22, range_considered=range(0,100,50))
 # print(ca.n_players)
-# # print(ca.func_string)
-# # print(ca.dict_coef)
-# # print(ca.all_coef)
-# # print(ca.population)
-# # print(ca.actual_curve)
+# print(ca.func_string)
+# print(ca.dict_coef)
+# print(ca.all_coef)
+# print(ca.population)
+# print(ca.actual_curve)
 
 ca.train()
 # print(ca.pop_error)
 # ca.single_tournament()
 # print(ca.n_tournaments())
-ca.parent_reprod([53, 37, 255, 24, 52, 95, 243], [107, 127, 145, 1, 20, 152, 32])
+ca.parents_reprod([53, 37, 255, 24, 52, 95, 243], [107, 127, 145, 1, 20, 152, 32], verbose=True)
