@@ -4,7 +4,7 @@ from math import sin, cos
 from string import ascii_uppercase
 from random import randint, sample
 
-class CurveAdjust:
+class CurveAdj:
     def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered) -> None:
         self.n_gen = n_generations
         self.pop_size = population_size
@@ -19,7 +19,7 @@ class CurveAdjust:
 
     def get_function(self) -> None:
         # self.func_string = input('\nTomando en cuenta las siguientes consideraciones:\n\t- "x" indica el valor del eje x\n\t- Cada coeficiente a buscar debe estar representada por una letra mayúscula entre comillas dobles, ejemplo:\n\t\t"A"*("B"*sin(x/"C") + "D"*cos(x/"E")) + "F"*x - "G"\nIngresa la función a evaluar:\n')
-        self.func_string = '"A"*("B"*sin("x"/"C") + "D"*cos("x"/"E")) + "F"*"x" - "G"'
+        self.func_string = '"A"*("B"*sin("x"/("C"+1e-10)) + "D"*cos("x"/("E"+1e-10))) + "F"*"x" - "G"'
 
 
     def get_coef(self) -> None:
@@ -69,7 +69,7 @@ class CurveAdjust:
         for _ in self.population_index:
             chrom = []
             for _ in range(self.n_chrom):
-                chrom.append(randint(1,255))
+                chrom.append(randint(0, 255))
             self.population.append(chrom)
 
         self.get_population_curves()
@@ -124,33 +124,35 @@ class CurveAdjust:
 
     
     def parents_reprod(self, parent_one: list, parent_two: list) -> tuple:
-        cutoff_point = randint(0, 8*self.n_chrom)
-        n_alleles = cutoff_point // 8
-        split_allele = cutoff_point % 8
+        cutoff_point = randint(1, 8*self.n_chrom)
+        n_gens = cutoff_point // 8
+        byte_mod = cutoff_point % 8
 
-        child_one = parent_one[:n_alleles]
-        child_two = parent_two[:n_alleles]
+        child_one = parent_one[:n_gens]
+        child_two = parent_two[:n_gens]
 
-        complete_allele = 0
+        if byte_mod != 0:
+            to_split_one = parent_one[n_gens]
+            to_split_two = parent_two[n_gens]
 
-        if split_allele != 0:
-            to_split_one = parent_one[n_alleles]
-            to_split_two = parent_two[n_alleles]
+            mask_lower = (2**(8 - byte_mod)) - 1
+            mask_upper = 255 - mask_lower
 
-            mask_one = (2**split_allele) - 1
-            mask_two = 255 - mask_one
+            upper_one = to_split_one & mask_upper
+            lower_two = to_split_two & mask_lower
+            to_append_one = upper_one | lower_two
 
-            upper_one = to_split_one & mask_one
-            upper_two = to_split_two & mask_one
-            lower_one = to_split_one & mask_two
-            lower_two = to_split_two & mask_two
-            child_one.append(lower_one | upper_two)
-            child_two.append(lower_two | upper_one)
+            upper_two = to_split_two & mask_upper
+            lower_one = to_split_one & mask_lower
+            to_append_two = upper_two | lower_one
 
-            complete_allele = 1
+            child_one.append(to_append_one)
+            child_two.append(to_append_two)
 
-        child_one += parent_two[n_alleles + complete_allele:]
-        child_two += parent_one[n_alleles + complete_allele:]
+            n_gens += 1
+
+        child_one += parent_two[n_gens:]
+        child_two += parent_one[n_gens:]
 
         return child_one, child_two
 
@@ -179,10 +181,19 @@ class CurveAdjust:
         self.create_population()
 
         train_history = []
-        for _ in range(self.n_gen):
+        for i in range(self.n_gen):
+            print(f'\nGeneración #{i+1} con {len(self.population)} indiv:')
             _winner, _error = self.n_tournaments()
+            print(f'Coeficientes ganadores {_winner} con error {_error:2f}')
             train_history.append((_winner, _error))
             self.new_population()
 
         self.top_winners, self.top_errors = [*zip(*train_history)]
 
+
+ca = CurveAdj(
+    population_size=100, 
+    tournament_size=0.05,
+    n_generations=100,
+    range_considered=range(100)
+)

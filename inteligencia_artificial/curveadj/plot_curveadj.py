@@ -1,7 +1,7 @@
-from train_curveadj import CurveAdjust
-from matplotlib.pyplot import subplots, show
+from train_curveadj import CurveAdj
+from matplotlib.pyplot import subplots
 
-class PlotCurveAdj(CurveAdjust):
+class PlotCurveAdj(CurveAdj):
     def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered) -> None:
         super().__init__(population_size, tournament_size, n_generations, range_considered)
 
@@ -11,10 +11,13 @@ class PlotCurveAdj(CurveAdjust):
 
     def plot_curves(self, i: int, **kwargs) -> None:
         self.axes[0].clear()
-        self.axes[0].plot(self.actual_curve, color='blue')     
-        self.axes[0].set_title(f'Estimated curve at gen #{i+1}')
+        self.axes[0].plot(self.actual_curve, color='blue')
+
         est_curve = self.curve_values(self.winners[i])
         self.axes[0].plot(est_curve, **kwargs)
+
+        self.axes[0].set_ylim(top=max(self.actual_curve)*1.1)
+        self.axes[0].set_title(f'Estimated curve at gen #{i+1}')
 
 
     def plot_error(self, i: int) -> None:
