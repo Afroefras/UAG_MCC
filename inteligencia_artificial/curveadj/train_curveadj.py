@@ -178,8 +178,11 @@ class CurveAdjust:
     def train(self) -> None:
         self.create_population()
 
-        self.train_history = []
+        train_history = []
         for _ in range(self.n_gen):
             _winner, _error = self.n_tournaments()
-            self.train_history.append((_winner, _error))
+            train_history.append((_winner, _error))
             self.new_population()
+
+        self.top_winners, self.top_errors = [*zip(*train_history)]
+

@@ -1,64 +1,39 @@
-from math import sin, cos
+from train_curveadj import CurveAdjust
 from matplotlib.pyplot import subplots, show
 
-class PlotTSP:
-    def __init__(self) -> None:
-        self.set_plot_env()
+class PlotCurveAdj(CurveAdjust):
+    def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered) -> None:
+        super().__init__(population_size, tournament_size, n_generations, range_considered)
 
-
-    def set_plot_env(self) -> None:
         self.fig, self.axes = subplots(nrows=1, ncols=2, figsize=(10,5))
-        self.dist_x, self.dist_y = [], []
+        self.func_x, self.func_y = [], []
 
 
-    def plot_curve(self, func_to_plot, range_to_plot, **kwargs) -> None:
-        self.axes[0].plot([func_to_plot(x) for x in range_to_plot], **kwargs)
-        
-
-    def connectpoints(self, point: tuple, **kwargs) -> None:
-        x1, x2 = self.cit_x[point[0]], self.cit_x[point[-1]]
-        y1, y2 = self.cit_y[point[0]], self.cit_y[point[-1]]
-        self.axes[0].plot([x1, x2],[y1, y2], **kwargs)        
-
-
-    def plot_route(self, i: int, **kwargs) -> None:
+    def plot_curves(self, i: int, **kwargs) -> None:
         self.axes[0].clear()
-
-        self.axes[0].set_title(f'Best route at gen #{i+1}')
-        self.plot_cities(**kwargs)
-
-        route = self.result['route'][i]
-        for city in route:
-            self.connectpoints(city, **kwargs)
+        self.axes[0].plot(self.actual_curve, color='blue')     
+        self.axes[0].set_title(f'Estimated curve at gen #{i+1}')
+        est_curve = self.curve_values(self.winners[i])
+        self.axes[0].plot(est_curve, **kwargs)
 
 
-    def plot_distance(self, i: int, **kwargs) -> None:
-        min_dist, max_dist = self.result['distance'][self.n_gen-1], self.result['distance'][0]
-        top_dist = self.result['distance'][i]
-        distance = f'Distance: {top_dist:.2f}'
+    def plot_error(self, i: int) -> None:
+        min_error, max_error = self.top_errors[self.n_gen-1], self.top_errors[0]
+        top_error = self.top_errors[i]
+        error = f'Error: {top_error:.2f}'
 
-        self.dist_x.append(i)
-        self.dist_y.append(top_dist)
+        self.func_x.append(i)
+        self.func_y.append(top_error)
 
         self.axes[1].clear()
 
-        self.axes[1].set_title(distance)
+        self.axes[1].set_title(error)
         self.axes[1].set_xlim([0, self.n_gen])
-        self.axes[1].set_ylim([min_dist*0.9, max_dist])
+        self.axes[1].set_ylim([min_error*0.9, max_error])
 
-        self.axes[1].plot(self.dist_x, self.dist_y, **kwargs)
-
-
-    def plot_tsp(self, i, **kwargs) -> None:
-        self.plot_route(i, **kwargs)
-        self.plot_distance(i, **kwargs)
+        self.axes[1].plot(self.func_x, self.func_y, color='blue')
 
 
-A, B, C, D, E, F, G = 8, 25, 4, 45, 10, 17, 35
-
-def actual_curve(x) -> float:
-    return A*(B*sin(x/C) + D*cos(x/E)) + F*x - G
-
-tsp = PlotTSP()
-tsp.plot_curve(actual_curve, range(100), c='r', ls='dashed')
-show()
+    def plot_curveadj(self, i, **kwargs) -> None:
+        self.plot_curves(i, **kwargs)
+        self.plot_error(i)
