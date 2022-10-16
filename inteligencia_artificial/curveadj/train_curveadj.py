@@ -1,17 +1,15 @@
-from math import sin, cos
-
-
 from re import findall
 from numpy import argmin
-from random import randint, sample
+from math import sin, cos
 from string import ascii_uppercase
+from random import randint, sample
 
 class CurveAdjust:
     def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered) -> None:
-        self.pop_size = population_size
         self.n_gen = n_generations
-        self.n_players = int(self.pop_size*tournament_size)
+        self.pop_size = population_size
         self.func_range = list(range_considered)
+        self.n_players = int(self.pop_size*tournament_size)
         
         self.get_function()
         self.get_coef()
@@ -66,13 +64,16 @@ class CurveAdjust:
     
     def create_population(self) -> None:
         self.population = []
-        for _ in range(self.pop_size):
+        self.population_index = list(range(self.pop_size))
+
+        for _ in self.population_index:
             chrom = []
             for _ in range(self.n_chrom):
                 chrom.append(randint(1,255))
             self.population.append(chrom)
 
-        self.population_index = list(range(len(self.population)))
+        self.get_population_curves()
+        self.all_abs_error()
 
 
     def get_population_curves(self) -> None:
@@ -84,56 +85,52 @@ class CurveAdjust:
     def get_abs_error(self, real_values: list, estimated_values: list) -> float:
         abs_error = 0
         for real, est in zip(real_values, estimated_values):
-            abs_error += abs(real-est)
+            abs_error += abs(real - est)
         return abs_error
     
 
     def all_abs_error(self) -> None:
         self.pop_error = []
         for indiv_curve in self.pop_curves:
-            abs_error = self.get_abs_error(self.actual_curve, indiv_curve)
-            self.pop_error.append(abs_error)
+            indiv_error = self.get_abs_error(self.actual_curve, indiv_curve)
+            self.pop_error.append(indiv_error)
 
 
     def single_tournament(self) -> tuple:
         sample_indexes = sample(self.population_index, self.n_players)
+
         sample_players = [self.population[x] for x in sample_indexes]
         sample_errors = [self.pop_error[x] for x in sample_indexes]
-
+        
         min_index = argmin(sample_errors)
         winner = sample_players[min_index]
         winner_error = sample_errors[min_index]
-        winner_index = sample_indexes[min_index]
 
-        return winner, winner_error, winner_index
+        return winner, winner_error
 
 
     def n_tournaments(self) -> list:
-        winners = []
+        self.winners = []
         _errors = []
-        _indexes = []
         for _ in range(self.pop_size):
-            winner, _error, _index = self.single_tournament()
-            winners.append(winner)
+            winner, _error = self.single_tournament()
+            self.winners.append(winner)
             _errors.append(_error)
-            _indexes.append(_index)
-
         min_index = argmin(_errors)
-        top_winner = winners[min_index]
+        top_winner = self.winners[min_index]
         top_error = _errors[min_index]
-        top_index = _indexes[min_index]
 
-        return top_winner, top_error, top_index
+        return top_winner, top_error
 
     
-    def parents_reprod(self, parent_one: list, parent_two: list, verbose: bool=False) -> tuple:
+    def parents_reprod(self, parent_one: list, parent_two: list) -> tuple:
         cutoff_point = randint(0, 8*self.n_chrom)
-        n_alleles = cutoff_point//8
+        n_alleles = cutoff_point // 8
         split_allele = cutoff_point % 8
 
         child_one = parent_one[:n_alleles]
         child_two = parent_two[:n_alleles]
-        
+
         complete_allele = 0
 
         if split_allele != 0:
@@ -152,50 +149,37 @@ class CurveAdjust:
 
             complete_allele = 1
 
-        if verbose:
-            print('parent_one', parent_one)
-            print('parent_two', parent_two)
-            print('\ncutoff_point', cutoff_point)
-            print('n_alleles', n_alleles)
-            print('split_allele', split_allele)
-            print('\nchild_one', child_one)
-            print('child_two', child_two)
-            if split_allele != 0:
-                print('\nto_split_one', to_split_one, f"'{to_split_one:08b}")
-                print('to_split_two', to_split_two, f"'{to_split_two:08b}")
-                print('\nmask_one', mask_one, f"'{mask_one:08b}")
-                print('mask_two', mask_two, f"'{mask_two:08b}")
-                print('\nupper_one', upper_one, f"'{upper_one:08b}")
-                print('upper_two', upper_two, f"'{upper_two:08b}")
-                print('lower_one', lower_one, f"'{lower_one:08b}")
-                print('lower_two', lower_two, f"'{lower_two:08b}")
-                print('\nadd_to_child_one', lower_one | upper_two, f"'{lower_one | upper_two:08b}")
-                print('add_to_child_two', lower_two | upper_one, f"'{lower_two | upper_one:08b}")
-
         child_one += parent_two[n_alleles + complete_allele:]
         child_two += parent_one[n_alleles + complete_allele:]
-        if verbose:
-            print('\nchild_one', child_one)
-            print('child_two', child_two)
 
         return child_one, child_two
 
 
-    def train(self) -> None:
-        self.create_population()
+    def sort_list_based_on_another(self, based_on: list, to_sort: list, top_n: int=None) -> tuple:
+        zipped_lists = zip(based_on, to_sort)
+        sorted_pairs = sorted(zipped_lists)
+        _, result = [list(x) for x in  zip(*sorted_pairs)]
+        if top_n is not None:
+            return result[:top_n]
+        return result
+
+
+    def new_population(self) -> None:
+        self.population = []
+        for _ in range(self.pop_size//2):
+            parent_one, parent_two = sample(self.winners, 2)
+            child_one, child_two = self.parents_reprod(parent_one, parent_two)
+            self.population.extend([child_one, child_two])
+        
         self.get_population_curves()
         self.all_abs_error()
 
-ca = CurveAdjust(population_size=50, tournament_size=0.1, n_generations=22, range_considered=range(0,100,50))
-# print(ca.n_players)
-# print(ca.func_string)
-# print(ca.dict_coef)
-# print(ca.all_coef)
-# print(ca.population)
-# print(ca.actual_curve)
 
-ca.train()
-# print(ca.pop_error)
-# ca.single_tournament()
-# print(ca.n_tournaments())
-ca.parents_reprod([53, 37, 255, 24, 52, 95, 243], [107, 127, 145, 1, 20, 152, 32], verbose=True)
+    def train(self) -> None:
+        self.create_population()
+
+        self.train_history = []
+        for _ in range(self.n_gen):
+            _winner, _error = self.n_tournaments()
+            self.train_history.append((_winner, _error))
+            self.new_population()
