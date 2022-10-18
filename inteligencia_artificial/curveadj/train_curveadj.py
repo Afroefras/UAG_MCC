@@ -169,8 +169,9 @@ class CurveAdj:
             already_pos = []
             for _ in range(n_mutations):
                 mutation_pos = randint(1,8) - 1
-                while mutation_pos not in already_pos:
+                while mutation_pos in already_pos:
                     mutation_pos = randint(1,8) - 1
+                    already_pos.append(mutation_pos)
                 chromosome[mutant_index] = self.mutate(chromosome[mutant_index], mutation_pos)
         return chromosome
 
