@@ -2,12 +2,13 @@ from re import findall
 from numpy import argmin
 from math import sin, cos
 from string import ascii_uppercase
-from random import randint, sample
+from random import randint, sample, choices
 
 class CurveAdj:
-    def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered) -> None:
+    def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered, mutation_allowed: bool) -> None:
         self.n_gen = n_generations
         self.pop_size = population_size
+        self.mutation = mutation_allowed
         self.func_range = list(range_considered)
         self.n_players = int(self.pop_size*tournament_size)
         
@@ -69,7 +70,7 @@ class CurveAdj:
         for _ in self.population_index:
             chrom = []
             for _ in range(self.n_chrom):
-                chrom.append(randint(0, 255))
+                chrom.append(randint(0, 255) // 5)
             self.population.append(chrom)
 
         self.get_population_curves()
@@ -157,27 +158,47 @@ class CurveAdj:
         return child_one, child_two
 
 
-    def sort_list_based_on_another(self, based_on: list, to_sort: list, top_n: int=None) -> tuple:
-        zipped_lists = zip(based_on, to_sort)
-        sorted_pairs = sorted(zipped_lists)
-        _, result = [list(x) for x in  zip(*sorted_pairs)]
-        if top_n is not None:
-            return result[:top_n]
-        return result
+    def mutate(self, to_mutate: int, n_th: int) -> int:
+        mutant = to_mutate ^ (1 << (n_th - 1))
+        return mutant
 
 
-    def new_population(self) -> None:
+    def mutate_chromosome(self, chromosome: list, n_to_mutate: int, n_mutations: int) -> list:
+        mutants_indexes = choices(chromosome, k=n_to_mutate)
+        for mutant_index in mutants_indexes:
+            already_pos = []
+            for _ in range(n_mutations):
+                mutation_pos = randint(1,8) - 1
+                while mutation_pos not in already_pos:
+                    mutation_pos = randint(1,8) - 1
+                chromosome[mutant_index] = self.mutate(chromosome[mutant_index], mutation_pos)
+        return chromosome
+
+
+    def mutate_population(self, mutation_rate: float, **kwargs) -> None:
+        n_to_mutate = int(self.pop_size*mutation_rate)
+
+        chroms_indexes = sample(self.population_index, n_to_mutate)
+        for chrom_index in chroms_indexes:
+            chromosome = self.population[chrom_index]
+            mutant_chrom = self.mutate_chromosome(chromosome, n_to_mutate, **kwargs)
+            self.population[chrom_index] = mutant_chrom
+
+
+    def new_population(self, **kwargs) -> None:
         self.population = []
         for _ in range(self.pop_size//2):
             parent_one, parent_two = sample(self.winners, 2)
             child_one, child_two = self.parents_reprod(parent_one, parent_two)
             self.population.extend([child_one, child_two])
         
+        if self.mutate: self.mutate_population(**kwargs)
+
         self.get_population_curves()
         self.all_abs_error()
 
 
-    def train(self) -> None:
+    def train(self, **kwargs) -> None:
         self.create_population()
 
         train_history = []
@@ -186,14 +207,6 @@ class CurveAdj:
             _winner, _error = self.n_tournaments()
             print(f'Coeficientes ganadores {_winner} con error {_error:2f}')
             train_history.append((_winner, _error))
-            self.new_population()
+            self.new_population(**kwargs)
 
         self.top_winners, self.top_errors = [*zip(*train_history)]
-
-
-ca = CurveAdj(
-    population_size=100, 
-    tournament_size=0.05,
-    n_generations=100,
-    range_considered=range(100)
-)

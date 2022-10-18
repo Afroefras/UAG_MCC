@@ -2,8 +2,8 @@ from train_curveadj import CurveAdj
 from matplotlib.pyplot import subplots
 
 class PlotCurveAdj(CurveAdj):
-    def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered) -> None:
-        super().__init__(population_size, tournament_size, n_generations, range_considered)
+    def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered, mutation_allowed: bool) -> None:
+        super().__init__(population_size, tournament_size, n_generations, range_considered, mutation_allowed)
 
         self.fig, self.axes = subplots(nrows=1, ncols=2, figsize=(10,5))
         self.func_x, self.func_y = [], []
