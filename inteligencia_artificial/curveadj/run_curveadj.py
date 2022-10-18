@@ -1,5 +1,6 @@
 # Entorno ########################################################################
 
+from re import T
 from plot_curveadj import PlotCurveAdj
 
 from matplotlib.pyplot import show
@@ -8,7 +9,7 @@ from matplotlib.animation import FuncAnimation
 
 # Función para ajustar y valores reales ###########################################
 
-FUNCTION_TO_ADJUST = '"A"*("B"*sin("x"/"C") + "D"*cos("x"/"E")) + "F"*"x" - "G"'
+FUNCTION_TO_ADJUST = '"A"*("B"*sin("x"/("C"+1e-10)) + "D"*cos("x"/("E"+1e-10))) + "F"*"x" - "G"'
 ACTUAL_VALUES = (8, 25, 4, 45, 10, 17, 35)
 
 
@@ -27,7 +28,8 @@ ca = PlotCurveAdj(
 
 ca.train(
     mutation_rate=0.1,
-    n_mutations=1,    
+    n_mutations=2,
+    verbose=True,  
 )
 
 # Gráfica ##########################################################################

@@ -31,7 +31,7 @@ class PlotCurveAdj(CurveAdj):
         self.axes[1].clear()
 
         self.axes[1].set_title(error)
-        self.axes[1].set_xlim([0, self.n_gen])
+        # self.axes[1].set_xlim([0, self.n_gen])
         self.axes[1].set_ylim([min_error*0.9, max_error])
 
         self.axes[1].plot(self.func_x, self.func_y, color='blue')

@@ -19,8 +19,8 @@ class CurveAdj:
 
 
     def get_function(self) -> None:
-        # self.func_string = input('\nTomando en cuenta las siguientes consideraciones:\n\t- "x" indica el valor del eje x\n\t- Cada coeficiente a buscar debe estar representada por una letra mayúscula entre comillas dobles, ejemplo:\n\t\t"A"*("B"*sin(x/"C") + "D"*cos(x/"E")) + "F"*x - "G"\nIngresa la función a evaluar:\n')
-        self.func_string = '"A"*("B"*sin("x"/("C"+1e-10)) + "D"*cos("x"/("E"+1e-10))) + "F"*"x" - "G"'
+        self.func_string = input('\nTomando en cuenta las siguientes consideraciones:\n\t- "x" indica el valor del eje x\n\t- Cada coeficiente a buscar debe estar representada por una letra mayúscula entre comillas dobles, ejemplo:\n\t\t"A"*("B"*sin(x/"C") + "D"*cos(x/"E")) + "F"*x - "G"\nIngresa la función a evaluar:\n')
+        # self.func_string = '"A"*("B"*sin("x"/("C"+1e-10)) + "D"*cos("x"/("E"+1e-10))) + "F"*"x" - "G"'
 
 
     def get_coef(self) -> None:
@@ -31,11 +31,11 @@ class CurveAdj:
 
     def get_actual_values(self) -> None:
         self.actual_values = {}
-        for _coef, actual_value in zip(self.all_coef, (8, 25, 4, 45, 10, 17, 35)):
+        # for _coef, actual_value in zip(self.all_coef, (8, 25, 4, 45, 10, 17, 35)):
+        #     self.actual_values[_coef.replace('"','')] = actual_value
+        for _coef in self.all_coef:
+            actual_value = input(f'¿Cuál es el valor real de {_coef}? ')
             self.actual_values[_coef.replace('"','')] = actual_value
-        # for _coef in self.all_coef:
-            # actual_value = input(f'¿Cuál es el valor real de {_coef}? ')
-            # self.actual_values[_coef.replace('"','')] = actual_value
         
     
     def function_to_eval(self, values_list: list) -> str:
@@ -164,14 +164,15 @@ class CurveAdj:
 
 
     def mutate_chromosome(self, chromosome: list, n_to_mutate: int, n_mutations: int) -> list:
-        mutants_indexes = choices(chromosome, k=n_to_mutate)
+        mutants_indexes = choices(range(len(chromosome)), k=n_to_mutate)
         for mutant_index in mutants_indexes:
             already_pos = []
             for _ in range(n_mutations):
-                mutation_pos = randint(1,8) - 1
+                mutation_pos = randint(1,8)
                 while mutation_pos in already_pos:
-                    mutation_pos = randint(1,8) - 1
+                    mutation_pos = randint(1,8)
                     already_pos.append(mutation_pos)
+                
                 chromosome[mutant_index] = self.mutate(chromosome[mutant_index], mutation_pos)
         return chromosome
 
@@ -199,15 +200,17 @@ class CurveAdj:
         self.all_abs_error()
 
 
-    def train(self, **kwargs) -> None:
+    def train(self, verbose: bool=False, **kwargs) -> None:
         self.create_population()
 
         train_history = []
         for i in range(self.n_gen):
-            print(f'\nGeneración #{i+1} con {len(self.population)} indiv:')
             _winner, _error = self.n_tournaments()
-            print(f'Coeficientes ganadores {_winner} con error {_error:2f}')
             train_history.append((_winner, _error))
+            if verbose: print(f'\nGeneración #{i+1} con {len(self.population)} indiv:\nCoeficientes ganadores {_winner} con error {_error:2f}')
+            if round(_error,6) == 0: 
+                print('El error absoluto es 0, proceso terminado :)')
+                break
             self.new_population(**kwargs)
 
         self.top_winners, self.top_errors = [*zip(*train_history)]
