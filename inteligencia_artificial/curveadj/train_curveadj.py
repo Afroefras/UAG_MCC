@@ -1,8 +1,10 @@
+from os import system
 from re import findall
 from numpy import argmin
 from math import sin, cos
 from string import ascii_uppercase
 from random import randint, sample, choices
+
 
 class CurveAdj:
     def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered, mutation_allowed: bool) -> None:
@@ -19,8 +21,7 @@ class CurveAdj:
 
 
     def get_function(self) -> None:
-        self.func_string = input('\nTomando en cuenta las siguientes consideraciones:\n\t- "x" indica el valor del eje x\n\t- Cada coeficiente a buscar debe estar representada por una letra mayúscula entre comillas dobles, ejemplo:\n\t\t"A"*("B"*sin(x/"C") + "D"*cos(x/"E")) + "F"*x - "G"\nIngresa la función a evaluar:\n')
-        # self.func_string = '"A"*("B"*sin("x"/("C"+1e-10)) + "D"*cos("x"/("E"+1e-10))) + "F"*"x" - "G"'
+        self.func_string = input('\nTomando en cuenta las siguientes consideraciones:\n\t- "x" indica el valor del eje x\n\t- Cada coeficiente será una letra mayúscula entre comillas dobles\n\tejemplo:\n\t\t"A"*"x"**2 + "B"*"x" + "C"\nIngresa la función a evaluar:\n')
 
 
     def get_coef(self) -> None:
@@ -31,11 +32,14 @@ class CurveAdj:
 
     def get_actual_values(self) -> None:
         self.actual_values = {}
-        # for _coef, actual_value in zip(self.all_coef, (8, 25, 4, 45, 10, 17, 35)):
-        #     self.actual_values[_coef.replace('"','')] = actual_value
+        print('')
         for _coef in self.all_coef:
             actual_value = input(f'¿Cuál es el valor real de {_coef}? ')
-            self.actual_values[_coef.replace('"','')] = actual_value
+            self.actual_values[_coef.replace('"','')] = int(actual_value)
+
+        self.aux_weight = 255 // max(self.actual_values.values())
+        self.values_to_print = ", ".join([f'{x}={y}' for x,y in self.actual_values.items()])
+
         
     
     def function_to_eval(self, values_list: list) -> str:
@@ -70,11 +74,17 @@ class CurveAdj:
         for _ in self.population_index:
             chrom = []
             for _ in range(self.n_chrom):
-                chrom.append(randint(0, 255) // 5)
+                chrom.append(randint(0, 255))
             self.population.append(chrom)
 
+        self.scale_list_of_lists()
         self.get_population_curves()
         self.all_abs_error()
+
+    
+    def scale_list_of_lists(self) -> None:
+        aux = map(lambda x: [y//self.aux_weight for y in x], self.population) 
+        self.population = list(aux)
 
 
     def get_population_curves(self) -> None:
@@ -100,23 +110,33 @@ class CurveAdj:
     def single_tournament(self) -> tuple:
         sample_indexes = sample(self.population_index, self.n_players)
 
-        sample_players = [self.population[x] for x in sample_indexes]
-        sample_errors = [self.pop_error[x] for x in sample_indexes]
+        players = [self.population[x] for x in sample_indexes]
+        players_error = [self.pop_error[x] for x in sample_indexes]
+        players_index = [self.population_index[x] for x in sample_indexes]
         
-        min_index = argmin(sample_errors)
-        winner = sample_players[min_index]
-        winner_error = sample_errors[min_index]
+        min_index = argmin(players_error)
+        winner = players[min_index]
+        winner_error = players_error[min_index]
+        winner_index = players_index[min_index]
 
-        return winner, winner_error
+        return winner, winner_error, winner_index
 
 
     def n_tournaments(self) -> list:
         self.winners = []
         _errors = []
+        n_wins = {x:0 for x in self.population_index}
+
         for _ in range(self.pop_size):
-            winner, _error = self.single_tournament()
+            winner, _error, _index = self.single_tournament()
+
+            while n_wins[_index] >= 3:
+                winner, _error, _index = self.single_tournament()        
+
+            n_wins[_index] += 1               
             self.winners.append(winner)
             _errors.append(_error)
+
         min_index = argmin(_errors)
         top_winner = self.winners[min_index]
         top_error = _errors[min_index]
@@ -166,12 +186,12 @@ class CurveAdj:
     def mutate_chromosome(self, chromosome: list, n_to_mutate: int, n_mutations: int) -> list:
         mutants_indexes = choices(range(len(chromosome)), k=n_to_mutate)
         for mutant_index in mutants_indexes:
-            already_pos = []
+            already_pos = set()
             for _ in range(n_mutations):
                 mutation_pos = randint(1,8)
                 while mutation_pos in already_pos:
                     mutation_pos = randint(1,8)
-                    already_pos.append(mutation_pos)
+                    already_pos.add(mutation_pos)
                 
                 chromosome[mutant_index] = self.mutate(chromosome[mutant_index], mutation_pos)
         return chromosome
@@ -200,17 +220,25 @@ class CurveAdj:
         self.all_abs_error()
 
 
-    def train(self, verbose: bool=False, **kwargs) -> None:
+    def train(self, stop_at_n_same_error: int, verbose: bool=False, **kwargs) -> None:
+        func_to_print = self.func_string.replace('"','')
         self.create_population()
 
-        train_history = []
+        self.top_winners = []
+        self.top_errors = []
         for i in range(self.n_gen):
             _winner, _error = self.n_tournaments()
-            train_history.append((_winner, _error))
-            if verbose: print(f'\nGeneración #{i+1} con {len(self.population)} indiv:\nCoeficientes ganadores {_winner} con error {_error:2f}')
-            if round(_error,6) == 0: 
-                print('El error absoluto es 0, proceso terminado :)')
-                break
-            self.new_population(**kwargs)
+            self.top_winners.append(_winner)
+            self.top_errors.append(_error)
 
-        self.top_winners, self.top_errors = [*zip(*train_history)]
+            if verbose: 
+                system('clear')
+                print(f'{func_to_print}\n\nCon valores reales: {self.values_to_print}\n\nGeneración #{i+1} con {len(self.population)} indiv:\nCoeficientes ganadores {_winner} con error {_error:0.2f}')
+
+            last_n_errors = set(self.top_errors[-stop_at_n_same_error:])
+            if i > stop_at_n_same_error and len(last_n_errors) == 1:
+                print(f'\nEl error {_error:0.2f} se ha mantenido durante {stop_at_n_same_error} generaciones.\nEntrenamiento terminado :)')
+                self.n_gen = i
+                break
+
+            self.new_population(**kwargs)

@@ -1,8 +1,8 @@
 # Entorno ########################################################################
 
-from re import T
 from plot_curveadj import PlotCurveAdj
 
+from time import sleep
 from matplotlib.pyplot import show
 from matplotlib.animation import FuncAnimation
 
@@ -16,19 +16,21 @@ ACTUAL_VALUES = (8, 25, 4, 45, 10, 17, 35)
 # Parámetros ######################################################################
 
 ca = PlotCurveAdj(
-    population_size=500, 
+    population_size=400,
     tournament_size=0.05,
     n_generations=100,
     range_considered=range(100),
     mutation_allowed=True,
+    figsize=(12,5),
 )
 
 
 # Entrenamiento ###################################################################
 
 ca.train(
-    mutation_rate=0.1,
-    n_mutations=2,
+    stop_at_n_same_error=15,
+    mutation_rate=0.15,
+    n_mutations=1,
     verbose=True,  
 )
 
@@ -38,7 +40,9 @@ anim = FuncAnimation(
     ca.fig, 
     lambda x: ca.plot_curveadj(x, c='red', ls='dashed'),
     frames=ca.n_gen,
-    interval=10,
+    interval=200,
     repeat=False,
 )
+
+sleep(3)
 show()
