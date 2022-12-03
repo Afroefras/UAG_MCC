@@ -13,13 +13,13 @@ class PlotCurveAdj(CurveAdj):
         self.axes[0].clear()
         self.axes[0].plot(self.actual_values, color='blue')
 
-        est_curve = self.curve_values(self.top_winners[i])
+        func_with_coef = self.function_to_eval(self.func_string, self.top_winners[i])
+        est_curve = self.curve_values(func_with_coef)
+        
         self.axes[0].plot(est_curve, **kwargs)
         self.axes[0].set_ylim(top=max(self.actual_values)*1.1)
 
-        winner_func = self.function_to_eval(self.top_winners[i]).replace('"','')
-        self.axes[0]
-        self.axes[0].set_title(winner_func)
+        self.axes[0].set_title("Curva real vs estimada")
 
 
     def plot_error(self, i: int) -> None:
@@ -34,7 +34,7 @@ class PlotCurveAdj(CurveAdj):
         error = f'Gen #{str(i+1).zfill(3)} error: {top_error:.2f}'
         self.axes[1].set_title(error)
         # self.axes[1].set_xlim([0, self.n_gen])
-        self.axes[1].set_ylim([min_error*0.9, max_error])
+        self.axes[1].set_ylim([min_error*0.9, max_error*1.1])
 
         self.axes[1].plot(self.func_x, self.func_y, color='blue')
 

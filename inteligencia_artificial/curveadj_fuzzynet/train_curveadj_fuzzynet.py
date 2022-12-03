@@ -237,10 +237,10 @@ class CurveAdj:
                 system('clear')
                 print(f'{func_to_print}\n\nGeneración #{i+1} con {len(self.population)} indiv:\nCoeficientes ganadores {_winner} con error {_error:0.2f}')
 
-            # last_n_errors = set(self.top_errors[-stop_at_n_same_error:])
-            # if i > stop_at_n_same_error and len(last_n_errors) == 1:
-            #     print(f'\nEl error {_error:0.2f} se ha mantenido durante {stop_at_n_same_error} generaciones.\nEntrenamiento terminado :)')
-            #     self.n_gen = i
-            #     break
+            last_n_errors = set(self.top_errors[-stop_at_n_same_error:])
+            if i > stop_at_n_same_error and len(last_n_errors) == 1:
+                print(f'\nEl error {_error:0.2f} se ha mantenido durante {stop_at_n_same_error} generaciones.\nEntrenamiento terminado :)')
+                self.n_gen = i
+                break
 
             self.new_population(**kwargs)
