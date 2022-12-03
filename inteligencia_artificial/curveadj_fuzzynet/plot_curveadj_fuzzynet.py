@@ -11,11 +11,11 @@ class PlotCurveAdj(CurveAdj):
 
     def plot_curves(self, i: int, **kwargs) -> None:
         self.axes[0].clear()
-        self.axes[0].plot(self.actual_curve, color='blue')
+        self.axes[0].plot(self.actual_values, color='blue')
 
         est_curve = self.curve_values(self.top_winners[i])
         self.axes[0].plot(est_curve, **kwargs)
-        self.axes[0].set_ylim(top=max(self.actual_curve)*1.1)
+        self.axes[0].set_ylim(top=max(self.actual_values)*1.1)
 
         winner_func = self.function_to_eval(self.top_winners[i]).replace('"','')
         self.axes[0]

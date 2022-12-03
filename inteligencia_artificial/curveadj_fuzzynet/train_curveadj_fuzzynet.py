@@ -1,7 +1,7 @@
-from math import exp
 from os import system
 from numpy import argmin
 from re import findall, sub
+from math import exp, sin, cos
 from string import ascii_uppercase
 from random import randint, sample, choices
 
@@ -13,15 +13,9 @@ class CurveAdj:
         self.mutation = mutation_allowed
         self.func_range = list(range_considered)
         self.n_players = int(self.pop_size*tournament_size)
-        
-        self.get_function()
-        self.get_coef()
-        # self.get_actual_values()
-        self.actual_curve_values()
 
 
-    def get_function(self) -> None:
-        # self.func_string = input('\nTomando en cuenta las siguientes consideraciones:\n\t- "x" indica el valor del eje x\n\t- Cada coeficiente será una letra mayúscula entre comillas dobles\n\tejemplo:\n\t\t"A"*"x"**2 + "B"*"x" + "C"\nIngresa la función a evaluar:\n')
+    def set_fuzzynet(self) -> None:
         self.func_string = '''
         (
             exp((-("x" - "A")**2) / (2*"D"**2 + 1e-10))*("G"*"x" + "J") + 
@@ -41,22 +35,10 @@ class CurveAdj:
         self.all_coef = findall(upper_pattern, self.func_string)
         self.all_coef = sorted(list(set(self.all_coef)))
         self.n_chrom = len(self.all_coef)
-
-
-    # def get_actual_values(self) -> None:
-    #     self.actual_values = {}
-    #     print('')
-    #     for _coef in self.all_coef:
-    #         actual_value = input(f'¿Cuál es el valor real de {_coef}? ')
-    #         self.actual_values[_coef.replace('"','')] = int(actual_value)
-
-    #     self.aux_weight = 255 // max(self.actual_values.values())
-    #     self.values_to_print = ", ".join([f'{x}={y}' for x,y in self.actual_values.items()])
-
         
     
-    def function_to_eval(self, values_list: list) -> str:
-        to_eval = self.func_string
+    def function_to_eval(self, _func, values_list: list) -> str:
+        to_eval = _func
         for _keym, _value in zip(self.all_coef, values_list):
             to_eval = to_eval.replace(_keym, str(_value))
         return to_eval
@@ -67,17 +49,12 @@ class CurveAdj:
         return eval(eval_at_x)
 
     
-    def curve_values(self, values_list) -> list:
+    def curve_values(self, func_with_coef) -> list:
         curve = []
-        func_with_coef = self.function_to_eval(values_list)
         for x in self.func_range:
             y = self.evaluate_function(func_with_coef, x)
             curve.append(y)
         return curve
-
-
-    def actual_curve_values(self) -> None:
-        self.actual_curve = self.curve_values(self.actual_values.values())
 
     
     def create_population(self) -> None:
@@ -90,20 +67,27 @@ class CurveAdj:
                 chrom.append(randint(0, 255))
             self.population.append(chrom)
 
-        self.scale_list_of_lists()
+        # self.scale_list_of_lists()
         self.get_population_curves()
         self.all_abs_error()
 
     
-    def scale_list_of_lists(self) -> None:
-        aux = map(lambda x: [y//self.aux_weight for y in x], self.population) 
-        self.population = list(aux)
+    # def scale_list_of_lists(self) -> None:
+    #     aux = map(lambda x: [y//self.aux_weight for y in x], self.population) 
+    #     self.population = list(aux)
 
 
     def get_population_curves(self) -> None:
         self.pop_curves = []
         for indiv in self.population:
-            self.pop_curves.append(self.curve_values(indiv))
+            self.pop_curves.append(
+                self.curve_values(
+                    self.function_to_eval(
+                        self.func_string,
+                        values_list=indiv
+                    )
+                )
+            )
 
     
     def get_abs_error(self, real_values: list, estimated_values: list) -> float:
@@ -116,7 +100,7 @@ class CurveAdj:
     def all_abs_error(self) -> None:
         self.pop_error = []
         for indiv_curve in self.pop_curves:
-            indiv_error = self.get_abs_error(self.actual_curve, indiv_curve)
+            indiv_error = self.get_abs_error(self.actual_values, indiv_curve)
             self.pop_error.append(indiv_error)
 
 
@@ -233,7 +217,12 @@ class CurveAdj:
         self.all_abs_error()
 
 
-    def train(self, stop_at_n_same_error: int, verbose: bool=False, **kwargs) -> None:
+    def train(self, actual_values, stop_at_n_same_error: int, verbose: bool=False, **kwargs) -> None:
+        self.actual_values = actual_values
+
+        self.set_fuzzynet()
+        self.get_coef()
+
         func_to_print = self.func_string.replace('"','')
         self.create_population()
 
@@ -246,12 +235,12 @@ class CurveAdj:
 
             if verbose: 
                 system('clear')
-                print(f'{func_to_print}\n\nCon valores reales: {self.values_to_print}\n\nGeneración #{i+1} con {len(self.population)} indiv:\nCoeficientes ganadores {_winner} con error {_error:0.2f}')
+                print(f'{func_to_print}\n\nGeneración #{i+1} con {len(self.population)} indiv:\nCoeficientes ganadores {_winner} con error {_error:0.2f}')
 
-            last_n_errors = set(self.top_errors[-stop_at_n_same_error:])
-            if i > stop_at_n_same_error and len(last_n_errors) == 1:
-                print(f'\nEl error {_error:0.2f} se ha mantenido durante {stop_at_n_same_error} generaciones.\nEntrenamiento terminado :)')
-                self.n_gen = i
-                break
+            # last_n_errors = set(self.top_errors[-stop_at_n_same_error:])
+            # if i > stop_at_n_same_error and len(last_n_errors) == 1:
+            #     print(f'\nEl error {_error:0.2f} se ha mantenido durante {stop_at_n_same_error} generaciones.\nEntrenamiento terminado :)')
+            #     self.n_gen = i
+            #     break
 
             self.new_population(**kwargs)

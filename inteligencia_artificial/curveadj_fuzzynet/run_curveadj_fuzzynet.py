@@ -5,6 +5,7 @@ from time import sleep
 from matplotlib.pyplot import show
 from matplotlib.animation import FuncAnimation
 
+
 # Parámetros ######################################################################
 ca = PlotCurveAdj(
     population_size=400,
@@ -15,8 +16,13 @@ ca = PlotCurveAdj(
     figsize=(12,5),
 )
 
+# Variables ########################################################################
+func_to_eval = '8*(25*sin("x"/4)+45*cos("x"/10))+17*"x"-35'
+quasipol = ca.curve_values(func_to_eval)
+
 # Entrenamiento ###################################################################
 ca.train(
+    actual_values=quasipol,
     stop_at_n_same_error=15,
     mutation_rate=0.19,
     n_mutations=1,
