@@ -1,8 +1,17 @@
-from train_curveadj_fuzzynet import CurveAdj
+from train_curveadj_fuzzynet import CurveAdjFuzzyNet
 from matplotlib.pyplot import subplots
 
-class PlotCurveAdj(CurveAdj):
-    def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered, mutation_allowed: bool, **kwargs) -> None:
+class PlotCurveAdjFuzzyNet(CurveAdjFuzzyNet):
+    def __init__(
+        self,
+        population_size: int,
+        tournament_size: float,
+        n_generations: int,
+        range_considered,
+        mutation_allowed: bool,
+        **kwargs
+        ) -> None:
+        
         super().__init__(population_size, tournament_size, n_generations, range_considered, mutation_allowed)
 
         self.fig, self.axes = subplots(nrows=1, ncols=2, **kwargs)

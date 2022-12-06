@@ -1,5 +1,5 @@
 # Entorno ########################################################################
-from plot_curveadj_fuzzynet import PlotCurveAdjFuzzyNet
+from plot_curveadj_fuzzynet_3D import PlotCurveAdjFuzzyNet3D
 
 from time import sleep
 from matplotlib.pyplot import show
@@ -7,8 +7,8 @@ from matplotlib.animation import FuncAnimation
 
 
 # Parámetros ######################################################################
-ca = PlotCurveAdjFuzzyNet(
-    population_size=300,
+ca = PlotCurveAdjFuzzyNet3D(
+    population_size=350,
     tournament_size=0.07,
     n_generations=200,
     range_considered=range(100),
@@ -23,7 +23,7 @@ quasipol = ca.curve_values(func_to_eval)
 # Entrenamiento ###################################################################
 ca.train(
     actual_values=quasipol,
-    stop_at_n_same_error=30,
+    stop_at_n_same_error=25,
     mutation_rate=0.19,
     n_mutations=1,
     verbose=True,
@@ -34,7 +34,7 @@ anim = FuncAnimation(
     ca.fig, 
     lambda x: ca.plot_curveadj(x, c='red', ls='dashed'),
     frames=ca.n_gen,
-    interval=200,
+    interval=150,
     repeat=False,
 )
 

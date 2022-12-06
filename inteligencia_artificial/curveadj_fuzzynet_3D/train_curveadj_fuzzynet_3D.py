@@ -6,7 +6,7 @@ from string import ascii_uppercase
 from random import randint, sample, choices
 
 
-class CurveAdjFuzzyNet:
+class CurveAdjFuzzyNet3D:
     def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered, mutation_allowed: bool) -> None:
         self.n_gen = n_generations
         self.pop_size = population_size
