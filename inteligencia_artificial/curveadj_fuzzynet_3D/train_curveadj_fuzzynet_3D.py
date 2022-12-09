@@ -6,12 +6,16 @@ from string import ascii_uppercase
 from random import randint, sample, choices
 
 
+
 class CurveAdjFuzzyNet3D:
-    def __init__(self, population_size: int, tournament_size: float, n_generations: int, range_considered, mutation_allowed: bool) -> None:
+    def __init__(self, population_size: int, tournament_size: float, n_generations: int, x_range, y_range, mutation_allowed: bool) -> None:
         self.n_gen = n_generations
         self.pop_size = population_size
         self.mutation = mutation_allowed
-        self.func_range = list(range_considered)
+
+        self.x_range = list(x_range)
+        self.y_range = list(y_range)
+
         self.n_players = int(self.pop_size*tournament_size)
 
 
@@ -44,17 +48,21 @@ class CurveAdjFuzzyNet3D:
         return to_eval
 
 
-    def evaluate_function(self, to_eval: str, x: int) -> float:
+    def evaluate_function(self, to_eval: str, x: int, y: int) -> float:
         eval_at_x = to_eval.replace('"x"', str(x))
-        return eval(eval_at_x)
+        eval_at_y = eval_at_x.replace('"y"', str(y))
+        return eval(eval_at_y)
 
     
-    def curve_values(self, func_with_coef) -> list:
-        curve = []
-        for x in self.func_range:
-            y = self.evaluate_function(func_with_coef, x)
-            curve.append(y)
-        return curve
+    def surface_values(self, func_with_coef) -> list:
+        surface = []
+        for x in self.x_range:
+            curve = []
+            for y in self.y_range:
+                y = self.evaluate_function(func_with_coef, x, y)
+                curve.append(y)
+            surface.append(curve)
+        return surface
 
     
     def create_population(self) -> None:
@@ -64,11 +72,11 @@ class CurveAdjFuzzyNet3D:
         for _ in self.population_index:
             chrom = []
             for _ in range(self.n_chrom):
-                chrom.append(randint(0, 255) // 10)
+                chrom.append(randint(0, 255) // 5)
             self.population.append(chrom)
 
         # self.scale_list_of_lists()
-        self.get_population_curves()
+        self.get_population_surfaces()
         self.all_abs_error()
 
     
@@ -77,11 +85,11 @@ class CurveAdjFuzzyNet3D:
     #     self.population = list(aux)
 
 
-    def get_population_curves(self) -> None:
-        self.pop_curves = []
+    def get_population_surfaces(self) -> None:
+        self.pop_surfaces = []
         for indiv in self.population:
-            self.pop_curves.append(
-                self.curve_values(
+            self.pop_surfaces.append(
+                self.surface_values(
                     self.function_to_eval(
                         self.func_string,
                         values_list=indiv
@@ -99,8 +107,11 @@ class CurveAdjFuzzyNet3D:
 
     def all_abs_error(self) -> None:
         self.pop_error = []
-        for indiv_curve in self.pop_curves:
-            indiv_error = self.get_abs_error(self.actual_values, indiv_curve)
+        for indiv_surface in self.pop_surfaces:
+            indiv_error = 0
+            for i, indiv_curve in enumerate(indiv_surface):
+                to_get_error = self.actual_values[i]
+                indiv_error += self.get_abs_error(to_get_error, indiv_curve)
             self.pop_error.append(indiv_error)
 
 
@@ -206,14 +217,14 @@ class CurveAdjFuzzyNet3D:
 
     def new_population(self, **kwargs) -> None:
         self.population = []
-        for _ in range(self.pop_size//2):
+        for _ in range(self.pop_size // 2):
             parent_one, parent_two = sample(self.winners, 2)
             child_one, child_two = self.parents_reprod(parent_one, parent_two)
             self.population.extend([child_one, child_two])
         
         if self.mutate: self.mutate_population(**kwargs)
 
-        self.get_population_curves()
+        self.get_population_surfaces()
         self.all_abs_error()
 
 

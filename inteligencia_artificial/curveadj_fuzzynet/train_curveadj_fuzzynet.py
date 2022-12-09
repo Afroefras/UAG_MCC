@@ -2,7 +2,6 @@ from os import system
 from numpy import argmin
 from re import findall, sub
 from math import exp, sin, cos
-from string import ascii_uppercase
 from random import randint, sample, choices
 
 
@@ -31,8 +30,7 @@ class CurveAdjFuzzyNet:
         self.func_string = sub('\s', '', self.func_string)
 
     def get_coef(self) -> None:
-        upper_pattern = '|'.join(map(lambda x: f'"{x}"', ascii_uppercase))
-        self.all_coef = findall(upper_pattern, self.func_string)
+        self.all_coef = findall('\"[A-Z]\"', self.func_string)
         self.all_coef = sorted(list(set(self.all_coef)))
         self.n_chrom = len(self.all_coef)
         

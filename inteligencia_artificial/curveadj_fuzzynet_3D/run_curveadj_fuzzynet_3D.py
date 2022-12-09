@@ -8,21 +8,22 @@ from matplotlib.animation import FuncAnimation
 
 # Parámetros ######################################################################
 ca = PlotCurveAdjFuzzyNet3D(
-    population_size=350,
+    population_size=100,
     tournament_size=0.07,
-    n_generations=200,
-    range_considered=range(100),
+    n_generations=10,
+    x_range=[x/4 for x in range(20)],
+    y_range=[y/5 for y in range(25)],
     mutation_allowed=True,
     figsize=(11,7),
 )
 
 # Variables ########################################################################
-func_to_eval = '8*(25*sin("x"/4)+45*cos("x"/10))+17*"x"-35'
-quasipol = ca.curve_values(func_to_eval)
+func_to_eval = 'sin("x")*cos("y")'
+surface = ca.surface_values(func_to_eval)
 
 # Entrenamiento ###################################################################
 ca.train(
-    actual_values=quasipol,
+    actual_values=surface,
     stop_at_n_same_error=25,
     mutation_rate=0.19,
     n_mutations=1,
@@ -32,9 +33,10 @@ ca.train(
 # Gráfica ##########################################################################
 anim = FuncAnimation(
     ca.fig, 
-    lambda x: ca.plot_curveadj(x, c='red', ls='dashed'),
+    # lambda x: ca.plot_curveadj(x, c='red', ls='dashed'),
+    ca.plot_curveadj,
     frames=ca.n_gen,
-    interval=150,
+    interval=400,
     repeat=False,
 )
 
