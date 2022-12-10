@@ -8,7 +8,7 @@ from matplotlib.animation import FuncAnimation
 
 # Parámetros ######################################################################
 ca = PlotCurveAdjFuzzyNet3D(
-    population_size=200,
+    population_size=100,
     tournament_size=0.07,
     n_generations=100,
     x_range=[x/4 for x in range(20)],
@@ -18,8 +18,7 @@ ca = PlotCurveAdjFuzzyNet3D(
 )
 
 # Variables ########################################################################
-# func_to_eval = 'sin("x")*cos("y")'
-func_to_eval = '("x"/0.22)**2*("y"/0.33)**2'
+func_to_eval = '100*sin("x")*cos("y")'
 surface = ca.surface_values(func_to_eval)
 
 # Entrenamiento ###################################################################
@@ -28,11 +27,11 @@ ca.train(
     scale_dict={
         'M': 20,
         'D': 100,
-        'P': 5,
-        'Q': 5,
-        'R': 5,
+        'P': 1,
+        'Q': 1,
+        'R': 1,
     },
-    stop_at_n_same_error=10,
+    stop_at_n_same_error=25,
     mutation_rate=0.19,
     n_mutations=1,
     verbose=True,

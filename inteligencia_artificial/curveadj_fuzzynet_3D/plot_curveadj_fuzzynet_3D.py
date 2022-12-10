@@ -74,7 +74,7 @@ class PlotCurveAdjFuzzyNet3D(CurveAdjFuzzyNet3D):
         x_axis = arange(
             min(medians) - 1.5*max(std_devs)**(1/2),
             max(medians) + 1.5*max(std_devs)**(1/2),
-            1
+            0.007
         )
 
         for _median, std_dev in zip(medians, std_devs):

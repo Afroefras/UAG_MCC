@@ -91,7 +91,7 @@ class CurveAdjFuzzyNet3D:
 
         self.medians_pos = {x:y for x,y in self.pos_dict.items() if x[0]=='M'}
         self.std_devs_pos = {x:y for x,y in self.pos_dict.items() if x[0]=='D'}
-        
+
         self.scale_dict_pos = {}
         for x,y in self.pos_dict.items():
             first_letter = x[0]
@@ -282,5 +282,5 @@ class CurveAdjFuzzyNet3D:
                 print(f'\nEl error {_error:0.2f} se ha mantenido durante {stop_at_n_same_error} generaciones.\nEntrenamiento terminado :)')
                 self.n_gen = i
                 break
-
+            
             self.new_population(**kwargs)
