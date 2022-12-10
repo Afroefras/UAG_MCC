@@ -105,9 +105,8 @@ class CurveAdjFuzzyNet3D:
         for _ in self.population_index:
             chrom = []
             for i in range(self.n_chrom):
-                to_append = randint(0, 255)
-                scaled = self.scale(to_append, self.scale_dict_pos, position=i)
-                print(to_append, scaled)
+                to_scale = randint(0, 255)
+                scaled = to_scale // self.scale_dict_pos[i]
                 chrom.append(scaled)
             self.population.append(chrom)
 
