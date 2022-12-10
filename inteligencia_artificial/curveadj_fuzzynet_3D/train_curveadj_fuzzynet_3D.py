@@ -93,10 +93,6 @@ class CurveAdjFuzzyNet3D:
             first_letter = x[0]
             self.scale_dict_pos[y] = scale_dict[first_letter]
 
-    
-    def scale(self, to_scale: int, scale_dict: Dict, position: int) -> int:
-        return to_scale // scale_dict[position]
-
 
     def create_population(self) -> None:
         self.population = []
