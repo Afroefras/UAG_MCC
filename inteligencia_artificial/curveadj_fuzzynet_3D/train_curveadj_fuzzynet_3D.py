@@ -87,9 +87,13 @@ class CurveAdjFuzzyNet3D:
 
 
     def create_scale_dict(self, scale_dict: Dict) -> None:
-        pos_dict = {x.replace('"',''): i for i,x in enumerate(self.all_coef)}
+        self.pos_dict = {x.replace('"',''): i for i,x in enumerate(self.all_coef)}
+
+        self.medians_pos = {x:y for x,y in self.pos_dict.items() if x[0]=='M'}
+        self.std_devs_pos = {x:y for x,y in self.pos_dict.items() if x[0]=='D'}
+        
         self.scale_dict_pos = {}
-        for x,y in pos_dict.items():
+        for x,y in self.pos_dict.items():
             first_letter = x[0]
             self.scale_dict_pos[y] = scale_dict[first_letter]
 
