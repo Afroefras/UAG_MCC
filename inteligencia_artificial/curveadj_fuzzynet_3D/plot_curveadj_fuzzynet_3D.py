@@ -30,7 +30,7 @@ class PlotCurveAdjFuzzyNet3D(CurveAdjFuzzyNet3D):
         self.X = array([[x for _ in self.y_range] for x in self.x_range])
         self.Y = array([[y for y in self.y_range] for _ in self.x_range])
         Z = array(self.actual_values)
-        self.ax1.plot_wireframe(self.X, self.Y, Z, **kwargs)
+        self.ax1.plot_surface(self.X, self.Y, Z, **kwargs)
 
     
     def plot_est_surface(self, i: int, **kwargs) -> None:
@@ -38,13 +38,12 @@ class PlotCurveAdjFuzzyNet3D(CurveAdjFuzzyNet3D):
         est_surface = self.surface_values(func_with_coef)
 
         Z = array(est_surface)
-        # self.ax1.plot_wireframe(self.X, self.Y, Z, **kwargs)
-        self.ax1.plot_surface(self.X, self.Y, Z, **kwargs)
+        self.ax1.plot_wireframe(self.X, self.Y, Z, **kwargs)
         self.ax1.set_title("Superficie real vs estimada")
 
         top_y = [max(x) for x in self.actual_values]
-        self.ax1.set_ylim(top=max(top_y)*1.1)
-        self.ax1.set_xlim(left=min(self.x_range), right=max(self.x_range))
+        # self.ax1.set_ylim(top=max(top_y)*1.1)
+        # self.ax1.set_xlim(left=min(self.x_range), right=max(self.x_range))
 
 
 

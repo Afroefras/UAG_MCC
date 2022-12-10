@@ -1,8 +1,9 @@
 from os import system
+from typing import Dict
 from numpy import argmin
-from re import findall, sub
 from math import exp, sin, cos
 from string import ascii_uppercase
+from re import findall, sub, search
 from random import randint, sample, choices
 
 
@@ -20,23 +21,42 @@ class CurveAdjFuzzyNet3D:
 
 
     def set_fuzzynet(self) -> None:
-        self.func_string = '''
-        (
-            exp((-("x" - "A")**2) / (2*"D"**2 + 1e-10))*("G"*"x" + "J") + 
-            exp((-("x" - "B")**2) / (2*"E"**2 + 1e-10))*("H"*"x" + "K") + 
-            exp((-("x" - "C")**2) / (2*"F"**2 + 1e-10))*("I"*"x" + "L")
-        ) / (
-            exp((-("x" - "A")**2) / (2*"D"**2 + 1e-10)) + 
-            exp((-("x" - "B")**2) / (2*"E"**2 + 1e-10)) + 
-            exp((-("x" - "C")**2) / (2*"F"**2 + 1e-10)) + 
-            + 1e-10
-        )
-        '''
+        self.func = {}
+        for j in ('M','D'):
+            for i in range(6):
+                to_add = f'{j}{i+1}'
+                self.func[to_add] = f'"{to_add}"'
+
+        for j in ('P','Q','R'):
+            for i in range(9):
+                to_add = f'{j}{i+1}'
+                self.func[to_add] = f'"{to_add}"'
+
+        for i in range(6):
+            var = '"x"' if i < 3 else '"y"'
+            self.func[f'mf{i+1}'] = f'exp(-({var} - {self.func[f"M{i+1}"]})**2 / 2*{self.func[f"D{i+1}"]}**2)'
+
+        n = 1
+        for i in range(3):
+            for j in range(3,6):
+                self.func[f'inf{n}'] = f"({self.func[f'mf{i+1}']})*({self.func[f'mf{j+1}']})"
+                self.func[f'reg{n}'] = f'''
+                    {self.func[f'inf{n}']}*({self.func[f"P{n}"]}*"x" + {self.func[f"Q{n}"]}*"y" + {self.func[f"R{n}"]})
+                '''
+                n += 1
+
+        self.func['a'] = [y for x,y in self.func.items() if search('reg',x) is not None]
+        self.func['a'] = ' + '.join(self.func['a'])
+
+        self.func['b'] = [y for x,y in self.func.items() if search('inf',x) is not None]
+        self.func['b'] = ' + '.join(self.func['b'])    
+
+        self.func_string = f"({self.func['a']}) / ({self.func['b']})"
         self.func_string = sub('\s', '', self.func_string)
 
+
     def get_coef(self) -> None:
-        upper_pattern = '|'.join(map(lambda x: f'"{x}"', ascii_uppercase))
-        self.all_coef = findall(upper_pattern, self.func_string)
+        self.all_coef = findall('\"[A-Z]\d\"', self.func_string)
         self.all_coef = sorted(list(set(self.all_coef)))
         self.n_chrom = len(self.all_coef)
         
@@ -51,7 +71,8 @@ class CurveAdjFuzzyNet3D:
     def evaluate_function(self, to_eval: str, x: int, y: int) -> float:
         eval_at_x = to_eval.replace('"x"', str(x))
         eval_at_y = eval_at_x.replace('"y"', str(y))
-        return eval(eval_at_y)
+        try: return eval(eval_at_y)
+        except ZeroDivisionError: return 1e10
 
     
     def surface_values(self, func_with_coef) -> list:
@@ -64,25 +85,35 @@ class CurveAdjFuzzyNet3D:
             surface.append(curve)
         return surface
 
+
+    def create_scale_dict(self, scale_dict: Dict) -> None:
+        pos_dict = {x.replace('"',''): i for i,x in enumerate(self.all_coef)}
+        self.scale_dict_pos = {}
+        for x,y in pos_dict.items():
+            first_letter = x[0]
+            self.scale_dict_pos[y] = scale_dict[first_letter]
+        print(self.scale_dict_pos)
+
     
+    def scale(self, to_scale: int, scale_dict: Dict, position: int) -> int:
+        return to_scale // scale_dict[position]
+
+
     def create_population(self) -> None:
         self.population = []
         self.population_index = list(range(self.pop_size))
-
+        
         for _ in self.population_index:
             chrom = []
-            for _ in range(self.n_chrom):
-                chrom.append(randint(0, 255) // 5)
+            for i in range(self.n_chrom):
+                to_append = randint(0, 255)
+                scaled = self.scale(to_append, self.scale_dict_pos, position=i)
+                print(to_append, scaled)
+                chrom.append(scaled)
             self.population.append(chrom)
 
-        # self.scale_list_of_lists()
         self.get_population_surfaces()
         self.all_abs_error()
-
-    
-    # def scale_list_of_lists(self) -> None:
-    #     aux = map(lambda x: [y//self.aux_weight for y in x], self.population) 
-    #     self.population = list(aux)
 
 
     def get_population_surfaces(self) -> None:
@@ -228,13 +259,13 @@ class CurveAdjFuzzyNet3D:
         self.all_abs_error()
 
 
-    def train(self, actual_values, stop_at_n_same_error: int, verbose: bool=False, **kwargs) -> None:
+    def train(self, actual_values, scale_dict: Dict, stop_at_n_same_error: int, verbose: bool=False, **kwargs) -> None:
         self.actual_values = actual_values
 
         self.set_fuzzynet()
         self.get_coef()
 
-        func_to_print = self.func_string.replace('"','')
+        self.create_scale_dict(scale_dict)
         self.create_population()
 
         self.top_winners = []
@@ -246,7 +277,7 @@ class CurveAdjFuzzyNet3D:
 
             if verbose: 
                 system('clear')
-                print(f'{func_to_print}\n\nGeneración #{i+1} con {len(self.population)} indiv:\nCoeficientes ganadores {_winner} con error {_error:0.2f}')
+                print(f'Generación #{i+1} con {len(self.population)} indiv:\nCoeficientes ganadores {_winner} con error {_error:0.2f}')
 
             last_n_errors = set(self.top_errors[-stop_at_n_same_error:])
             if i > stop_at_n_same_error and len(last_n_errors) == 1:
