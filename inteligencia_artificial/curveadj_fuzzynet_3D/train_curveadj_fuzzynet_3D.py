@@ -92,7 +92,6 @@ class CurveAdjFuzzyNet3D:
         for x,y in pos_dict.items():
             first_letter = x[0]
             self.scale_dict_pos[y] = scale_dict[first_letter]
-        print(self.scale_dict_pos)
 
     
     def scale(self, to_scale: int, scale_dict: Dict, position: int) -> int:
