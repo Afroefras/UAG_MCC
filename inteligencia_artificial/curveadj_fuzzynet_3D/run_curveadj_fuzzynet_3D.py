@@ -11,14 +11,15 @@ ca = PlotCurveAdjFuzzyNet3D(
     population_size=100,
     tournament_size=0.07,
     n_generations=100,
-    x_range=[x/4 for x in range(20)],
-    y_range=[y/5 for y in range(25)],
+    x_range=[x for x in range(20)],
+    y_range=[y for y in range(25)],
     mutation_allowed=True,
     figsize=(11,7),
 )
 
 # Variables ########################################################################
-func_to_eval = '100*sin("x")*cos("y")'
+# func_to_eval = '100*sin("x")*cos("y")'
+func_to_eval = '10*"x"+10*"y"'
 surface = ca.surface_values(func_to_eval)
 
 # Entrenamiento ###################################################################
