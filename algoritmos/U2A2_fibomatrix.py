@@ -14,7 +14,7 @@ class FiboMatrix:
         for _ in range(n - 1):
             x = x @ self.base
 
-        return x[-1][-1]
+        return x
 
     def quick_exp(self, n: int) -> int:
         if n <= 1:
@@ -29,7 +29,7 @@ class FiboMatrix:
         for _ in range(n // 2 - 1):
             x = x @ self.base_square
 
-        return x[-1][-1]
+        return x
 
 
 class GetComplexity:
