@@ -18,7 +18,7 @@ class FiboMatrix:
 
     def quick_exp(self, n: int) -> int:
         if n <= 1:
-            return 1
+            return self.base
 
         x = self.base_square.copy()
 
@@ -30,6 +30,12 @@ class FiboMatrix:
             x = x @ self.base_square
 
         return x
+
+    def divide_et_impera(self, x: array, n: int) -> int:
+        pass
+
+    def fibo_quick(self, n: int) -> int:
+        pass
 
 
 class GetComplexity:
@@ -67,4 +73,9 @@ class PlotFiboMatrix(FiboMatrix, GetComplexity):
 
 pfm = PlotFiboMatrix()
 
-pfm.plot_fibomatrix(n_events=10000)
+for i in range(8):
+    print(i)
+    a = pfm.fibomatrix(i)
+    print(a)
+
+# pfm.plot_fibomatrix(n_events=100)
