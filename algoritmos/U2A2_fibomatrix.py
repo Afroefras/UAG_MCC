@@ -1,5 +1,5 @@
 from time import time
-from numpy import array, arange
+from numpy import array, arange, eye
 from matplotlib.pyplot import plot, title, legend, show
 
 
@@ -31,11 +31,19 @@ class FiboMatrix:
 
         return x
 
-    def divide_et_impera(self, x: array, n: int) -> int:
-        pass
+    def fiboquick(self, x: array, n: int) -> int:
+        if n > 1:
+            a = x @ x
+            b = eye((2))
 
-    def fibo_quick(self, n: int) -> int:
-        pass
+            if n % 2 != 0:
+                n -= 1
+                b = x.copy()
+
+            n /= 2
+            x = b @ self.fiboquick(a, n)
+
+        return x
 
 
 class GetComplexity:
@@ -63,19 +71,18 @@ class PlotFiboMatrix(FiboMatrix, GetComplexity):
     def plot_fibomatrix(self, n_events: int) -> None:
         f_x, f_y = self.function_time(n_events, self.fibomatrix)
         q_x, q_y = self.function_time(n_events, self.quick_exp)
+        fq_x, fq_y = self.function_time(
+            n_events, lambda x: self.fiboquick(self.base, x)
+        )
 
         plot(f_x, f_y, color="#4C64A4")
-        plot(q_x, q_y, color="#D86A6A", linestyle="dashed")
+        plot(q_x, q_y, color="#D86A6A")
+        plot(fq_x, fq_y, color="#DEC05F", linestyle="dashed")
         title("Fibonacci")
-        legend(["matricial", "exp. rápida"])
+        legend(["matricial", "exp. rápida lineal", "exp. rápida recursiva"])
         show()
 
 
 pfm = PlotFiboMatrix()
 
-for i in range(8):
-    print(i)
-    a = pfm.fibomatrix(i)
-    print(a)
-
-# pfm.plot_fibomatrix(n_events=100)
+pfm.plot_fibomatrix(n_events=100)
