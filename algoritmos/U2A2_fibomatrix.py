@@ -1,6 +1,6 @@
 from time import time
-from numpy import array, arange
-from matplotlib.pyplot import plot, title, legend, show
+from numpy import array, arange, eye
+from matplotlib.pyplot import plot, title, legend, show, xlabel, ylabel
 
 
 class FiboMatrix:
@@ -18,7 +18,7 @@ class FiboMatrix:
 
     def quick_exp(self, n: int) -> int:
         if n <= 1:
-            return 1
+            return self.base
 
         x = self.base_square.copy()
 
@@ -28,6 +28,20 @@ class FiboMatrix:
 
         for _ in range(n // 2 - 1):
             x = x @ self.base_square
+
+        return x
+
+    def fiboquick(self, x: array, n: int) -> int:
+        if n > 1:
+            a = x @ x
+            b = eye((2))
+
+            if n % 2 != 0:
+                n -= 1
+                b = x.copy()
+
+            n /= 2
+            x = b @ self.fiboquick(a, n)
 
         return x
 
@@ -57,14 +71,21 @@ class PlotFiboMatrix(FiboMatrix, GetComplexity):
     def plot_fibomatrix(self, n_events: int) -> None:
         f_x, f_y = self.function_time(n_events, self.fibomatrix)
         q_x, q_y = self.function_time(n_events, self.quick_exp)
+        fq_x, fq_y = self.function_time(
+            n_events, lambda x: self.fiboquick(self.base, x)
+        )
 
         plot(f_x, f_y, color="#4C64A4")
-        plot(q_x, q_y, color="#D86A6A", linestyle="dashed")
-        title("Fibonacci")
-        legend(["matricial", "exp. rápida"])
+        plot(q_x, q_y, color="#D86A6A")
+        plot(fq_x, fq_y, color="#DEC05F", linestyle="dashed")
+
+        legend(["matricial", "exp. rápida lineal", "exp. rápida recursiva"])
+        title("Fibonacci algorithms")
+        xlabel("# of events")
+        ylabel("Seconds")
         show()
 
 
 pfm = PlotFiboMatrix()
 
-pfm.plot_fibomatrix(n_events=10000)
+pfm.plot_fibomatrix(n_events=200)
