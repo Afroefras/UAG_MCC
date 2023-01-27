@@ -1,6 +1,6 @@
 from time import time
 from numpy import array, arange, eye
-from matplotlib.pyplot import plot, title, legend, show
+from matplotlib.pyplot import plot, title, legend, show, xlabel, ylabel
 
 
 class FiboMatrix:
@@ -78,11 +78,14 @@ class PlotFiboMatrix(FiboMatrix, GetComplexity):
         plot(f_x, f_y, color="#4C64A4")
         plot(q_x, q_y, color="#D86A6A")
         plot(fq_x, fq_y, color="#DEC05F", linestyle="dashed")
-        title("Fibonacci")
+
         legend(["matricial", "exp. rápida lineal", "exp. rápida recursiva"])
+        ylabel("Seconds (s)")
+        xlabel("# of events")
+        title("Fibonacci")
         show()
 
 
 pfm = PlotFiboMatrix()
 
-pfm.plot_fibomatrix(n_events=100)
+pfm.plot_fibomatrix(n_events=200)
