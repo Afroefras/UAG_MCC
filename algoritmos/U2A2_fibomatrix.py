@@ -80,9 +80,9 @@ class PlotFiboMatrix(FiboMatrix, GetComplexity):
         plot(fq_x, fq_y, color="#DEC05F", linestyle="dashed")
 
         legend(["matricial", "exp. rápida lineal", "exp. rápida recursiva"])
-        ylabel("Seconds (s)")
+        title("Fibonacci algorithms")
         xlabel("# of events")
-        title("Fibonacci")
+        ylabel("Seconds")
         show()
 
 
