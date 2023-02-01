@@ -53,7 +53,9 @@ class DeepNexus:
 
 dn = DeepNexus()
 dn.read_ugly_data(data_dir="algoritmos/U3A1_Grafo_no_conexo.txt")
+
 dn.get_nodes_n_edges()
 dn.adjacency_matrix()
 dn.create_discovered_nodes()
+
 dn.deep_search_all()
