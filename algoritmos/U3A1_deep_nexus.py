@@ -1,5 +1,4 @@
 from numpy import zeros
-from random import choice
 from re import search, IGNORECASE
 
 class DeepNexus:
@@ -45,8 +44,8 @@ class DeepNexus:
 
     def deep_search_all(self) -> None:
         while len(self.disc_nodes) < self.n_nodes:
-            nodes_left = [x for x in self.nodes if x not in self.disc_nodes]
-            node = choice(nodes_left)
+            nodes_left = set(self.nodes) - self.disc_nodes
+            node = next(iter(nodes_left))
             self.deep_search(node)
 
 
