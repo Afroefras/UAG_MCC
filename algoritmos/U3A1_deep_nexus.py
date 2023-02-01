@@ -1,6 +1,6 @@
 from numpy import zeros
+from random import choice
 from re import search, IGNORECASE
-
 
 class DeepNexus:
     def __init__(self) -> None:
@@ -28,18 +28,26 @@ class DeepNexus:
                 self.adjac[j, i] = 1
         print(self.adjac)
 
-    def get_adjancency_edges(self, node: int) -> list:
-        node_row = self.adjac[node, :].copy()
-        adjac_edges = filter(lambda x: node_row[x] == 1, range(self.n_nodes))
-        return list(adjac_edges)
-
     def create_discovered_nodes(self) -> None:
         self.disc_nodes = set()
 
+    def get_adjancency_edges(self, node: int) -> list:
+        node_row = self.adjac[node, :].copy()
+        adjac_nodes = filter(lambda x: node_row[x] == 1, range(self.n_nodes))
+        adjac_nodes = filter(lambda x: x not in self.disc_nodes, adjac_nodes)
+        return list(adjac_nodes)
+
     def deep_search(self, node: int) -> None:
-        print(node)
         self.disc_nodes.add(node)
-        for node_end in self.get_adjancency_edges(node):
+        adjac_nodes = self.get_adjancency_edges(node)
+
+        if not len(adjac_nodes):
+            nodes_left = [x for x in self.nodes if x not in self.disc_nodes]
+            if not len(nodes_left):
+                return None
+            adjac_nodes = [choice(nodes_left)]
+
+        for node_end in adjac_nodes:
             if node_end not in self.disc_nodes:
                 self.deep_search(node_end)
 
@@ -51,3 +59,4 @@ dn.get_nodes_n_edges()
 dn.adjacency_matrix(is_symmetric=True)
 dn.create_discovered_nodes()
 dn.deep_search(3)
+print(dn.disc_nodes)
