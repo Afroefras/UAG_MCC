@@ -1,6 +1,7 @@
 from numpy import zeros
 from re import search, IGNORECASE
 
+
 class DeepNexus:
     def __init__(self) -> None:
         pass
@@ -17,15 +18,13 @@ class DeepNexus:
         self.nodes = eval(matches.group(1))
         self.edges = eval(matches.group(2))
 
-    def adjacency_matrix(self, is_symmetric: bool) -> None:
+    def adjacency_matrix(self) -> None:
         self.n_nodes = len(self.nodes)
         self.adjac = zeros((self.n_nodes, self.n_nodes))
 
         for i, j in self.edges:
             self.adjac[i, j] = 1
-            if is_symmetric:
-                self.adjac[j, i] = 1
-        print(self.adjac)
+            self.adjac[j, i] = 1
 
     def create_discovered_nodes(self) -> None:
         self.disc_nodes = set()
@@ -39,20 +38,22 @@ class DeepNexus:
         self.disc_nodes.add(node)
         for node_end in self.get_adjancency_edges(node):
             if node_end not in self.disc_nodes:
-                print(f'{node} -> {node_end}')
+                print(f"{str(node).zfill(2)} -> {str(node_end).zfill(2)}")
                 self.deep_search(node_end)
 
     def deep_search_all(self) -> None:
+        i = 1
         while len(self.disc_nodes) < self.n_nodes:
+            print(f"Subgraph #{i}")
             nodes_left = set(self.nodes) - self.disc_nodes
             node = next(iter(nodes_left))
             self.deep_search(node)
+            i += 1
 
 
 dn = DeepNexus()
-# dn.read_ugly_data(data_dir="algoritmos/U3A1_Grafo_no_conexo.txt")
-dn.read_ugly_data(data_dir="algoritmos/U3A1_test.txt")
+dn.read_ugly_data(data_dir="algoritmos/U3A1_Grafo_no_conexo.txt")
 dn.get_nodes_n_edges()
-dn.adjacency_matrix(is_symmetric=True)
+dn.adjacency_matrix()
 dn.create_discovered_nodes()
 dn.deep_search_all()
