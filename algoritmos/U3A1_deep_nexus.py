@@ -31,25 +31,23 @@ class DeepNexus:
     def create_discovered_nodes(self) -> None:
         self.disc_nodes = set()
 
-    def get_adjancency_edges(self, node: int) -> list:
+    def get_adjancency_edges(self, node: int) -> set:
         node_row = self.adjac[node, :].copy()
         adjac_nodes = filter(lambda x: node_row[x] == 1, range(self.n_nodes))
-        adjac_nodes = filter(lambda x: x not in self.disc_nodes, adjac_nodes)
-        return list(adjac_nodes)
+        return set(adjac_nodes)
 
     def deep_search(self, node: int) -> None:
         self.disc_nodes.add(node)
-        adjac_nodes = self.get_adjancency_edges(node)
-
-        if not len(adjac_nodes):
-            nodes_left = [x for x in self.nodes if x not in self.disc_nodes]
-            if not len(nodes_left):
-                return None
-            adjac_nodes = [choice(nodes_left)]
-
-        for node_end in adjac_nodes:
+        for node_end in self.get_adjancency_edges(node):
             if node_end not in self.disc_nodes:
+                print(f'{node} -> {node_end}')
                 self.deep_search(node_end)
+
+    def deep_search_all(self) -> None:
+        while len(self.disc_nodes) < self.n_nodes:
+            nodes_left = [x for x in self.nodes if x not in self.disc_nodes]
+            node = choice(nodes_left)
+            self.deep_search(node)
 
 
 dn = DeepNexus()
@@ -58,5 +56,4 @@ dn.read_ugly_data(data_dir="algoritmos/U3A1_test.txt")
 dn.get_nodes_n_edges()
 dn.adjacency_matrix(is_symmetric=True)
 dn.create_discovered_nodes()
-dn.deep_search(3)
-print(dn.disc_nodes)
+dn.deep_search_all()
