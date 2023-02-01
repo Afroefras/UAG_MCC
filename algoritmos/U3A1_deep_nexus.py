@@ -42,13 +42,15 @@ class DeepNexus:
                 self.deep_search(node_end)
 
     def deep_search_all(self) -> None:
-        i = 1
+        i = 0
         while len(self.disc_nodes) < self.n_nodes:
+            i += 1
             print(f"Subgraph #{i}")
+
             nodes_left = set(self.nodes) - self.disc_nodes
             node = next(iter(nodes_left))
+            
             self.deep_search(node)
-            i += 1
 
 
 dn = DeepNexus()
