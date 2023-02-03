@@ -39,7 +39,7 @@ class ShortestRoute:
         winners = {}
         for new_sub_route, next_nodes in route.items():
             if not len(next_nodes):
-                return None
+                next_nodes = {0: inf}
 
             pre_winner = min(next_nodes, key=next_nodes.get)
             winners[(new_sub_route, pre_winner)] = next_nodes[pre_winner]
