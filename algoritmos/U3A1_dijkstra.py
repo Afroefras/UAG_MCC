@@ -64,13 +64,15 @@ class ShortestRoute:
         route = {**route, **new_routes}
 
         if (winner,) == self.end_node:
-            full_route = zip(map(str, sub_route), cum_dist)
+            full_route = zip(sub_route, cum_dist)
             full_route_dist = [f'"{x}" ({y})' for x, y in full_route]
             full_route_dist = " -> ".join(full_route_dist)
 
             start, end = self.start_node[0], self.end_node[0]
             print(f"Total distance from {start} to {end} = {sum_dist}\n")
-            print(full_route_dist, "\n")
+            print(full_route_dist, "\n", "-" * 77)
+
+            print(f"All routes:\n{route}\n")
             return None
 
         route[winner_route].pop(winner)
