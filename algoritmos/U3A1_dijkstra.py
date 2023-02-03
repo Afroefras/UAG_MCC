@@ -68,6 +68,11 @@ class ShortestRoute:
             full_route_dist = [f'"{x}" ({y})' for x, y in full_route]
             full_route_dist = " -> ".join(full_route_dist)
 
+            start, end = self.start_node[0], self.end_node[0]
+            print(f"Total distance from {start} to {end} = {sum_dist}\n")
+            print(full_route_dist)
+            return None
+
         route[winner_route].pop(winner)
         self.dijkstra(route)
 
