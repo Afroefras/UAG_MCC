@@ -45,11 +45,11 @@ class DeepNexus:
         i = 0
         while len(self.disc_nodes) < self.n_nodes:
             i += 1
-            print(f"Subgraph #{i}")
+            print(f"\nSubgraph #{i}:")
 
             nodes_left = set(self.nodes) - self.disc_nodes
             node = next(iter(nodes_left))
-            
+
             self.deep_search(node)
 
 
