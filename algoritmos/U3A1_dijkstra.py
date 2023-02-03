@@ -70,7 +70,7 @@ class ShortestRoute:
 
             start, end = self.start_node[0], self.end_node[0]
             print(f"Total distance from {start} to {end} = {sum_dist}\n")
-            print(full_route_dist)
+            print(full_route_dist, "\n")
             return None
 
         route[winner_route].pop(winner)
@@ -81,12 +81,7 @@ sr = ShortestRoute()
 sr.read_ugly_data(data_dir="algoritmos/U3A1_Grafo_ponderado.txt")
 sr.get_vars()
 sr.structure_vars()
-sr.create_route(start_node=(0,), end_node=(14,))
+print(f"\nEdges:\n{sr.edges}:\n", '-'*77)
 
-print(sr.edges)
-print("\n")
-# print(sr.min_route)
-# print("\n")
+sr.create_route(start_node=(0,), end_node=(14,))
 sr.dijkstra(sr.route)
-# print("\n")
-# print(sr.min_route)
