@@ -49,7 +49,7 @@ class DeepNexus:
 
             nodes_left = set(self.nodes) - self.disc_nodes
             node = next(iter(nodes_left))
-            
+
             self.deep_search(node)
 
 
