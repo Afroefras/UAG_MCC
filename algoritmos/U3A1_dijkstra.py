@@ -31,53 +31,52 @@ class ShortestRoute:
 
     def create_route(self, start_node: tuple, end_node: tuple) -> None:
         self.route = {start_node: self.edges[start_node].copy()}
+        self.start_node = start_node
         self.end_node = end_node
 
     def dijkstra(self, route: dict) -> None:
-        print(route)
-
-        new_route = {}
+        new_routes = {}
         winners = {}
-        for sub_route, next_nodes in route.items():
+        for new_sub_route, next_nodes in route.items():
             if not len(next_nodes):
                 return None
 
             pre_winner = min(next_nodes, key=next_nodes.get)
-            winners[(sub_route, pre_winner)] = next_nodes[pre_winner]
-            
-        winner_route, winner = min(winners, key=winners.get)
-        new_sub_route = winner_route + (winner,)
-        
-        new_route[new_sub_route] = self.edges[(winner,)].copy()
+            winners[(new_sub_route, pre_winner)] = next_nodes[pre_winner]
 
-        cum_dist = 0
-        for i, _ in enumerate(new_sub_route[:-1]):
-            current_node = new_sub_route[i]
-            next_node = new_sub_route[i + 1]
+        winner_route, winner = min(winners, key=winners.get)
+        sub_route = winner_route + (winner,)
+
+        cum_dist = [0]
+        for i, _ in enumerate(sub_route[:-1]):
+            current_node = sub_route[i]
+            next_node = sub_route[i + 1]
 
             node_dist = self.edges[(current_node,)][next_node]
-            cum_dist += node_dist
+            cum_dist.append(node_dist)
 
-        dist_to_add = new_route[new_sub_route].items()
-        new_route[new_sub_route] = {x: y + cum_dist for x, y in dist_to_add}
+        new_routes[sub_route] = self.edges[(winner,)].copy()
 
-        route = {**route, **new_route}
+        sum_dist = sum(cum_dist)
+        dist_to_add = new_routes[sub_route].items()
 
-        route[winner_route].pop(winner)  
+        new_routes[sub_route] = {x: y + sum_dist for x, y in dist_to_add}
+        route = {**route, **new_routes}
 
         if (winner,) == self.end_node:
-            print(" -> ".join(map(str, new_sub_route)))
-            return None  
+            full_route = zip(map(str, sub_route), cum_dist)
+            full_route_dist = [f'"{x}" ({y})' for x, y in full_route]
+            full_route_dist = " -> ".join(full_route_dist)
 
+        route[winner_route].pop(winner)
         self.dijkstra(route)
-        
 
 
 sr = ShortestRoute()
 sr.read_ugly_data(data_dir="algoritmos/U3A1_Grafo_ponderado.txt")
 sr.get_vars()
 sr.structure_vars()
-sr.create_route(start_node=(0,), end_node=(8,))
+sr.create_route(start_node=(0,), end_node=(14,))
 
 print(sr.edges)
 print("\n")
