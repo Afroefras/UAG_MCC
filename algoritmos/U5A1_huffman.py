@@ -1,63 +1,61 @@
-from heapq import heappush, heappop, heapify
 from collections import defaultdict
 
 
-def huffman_encoding(text: str) -> tuple:
-    # Paso 1: Contar las frecuencias de cada caracter en la cadena de entrada
-    freq = defaultdict(int)
-    for char in text:
-        freq[char] += 1
+class Huffman:
+    def __init__(self) -> None:
+        pass
 
-    # Paso 2: Construir el árbol de Huffman
-    # utilizando una cola de prioridad (heap)
-    heap = [[wt, [sym, ""]] for sym, wt in freq.items()]
-    heapify(heap)
+    def huffman_encoding(self, text: str) -> tuple:
+        char_frec = defaultdict(int)
+        for x in text:
+            char_frec[x] += 1
 
-    while len(heap) > 1:
-        lo = heappop(heap)
-        hi = heappop(heap)
-        for pair in lo[1:]:
-            pair[1] = "0" + pair[1]
-        for pair in hi[1:]:
-            pair[1] = "1" + pair[1]
-        heappush(heap, [lo[0] + hi[0]] + lo[1:] + hi[1:])
+        frecs = [(x, f) for x, f in char_frec.items()]
+        frecs.sort(key=lambda x: x[1])
 
-    # Paso 3: Crear un diccionario que asocie cada
-    # caracter con su código de Huffman
-    huffman_dict = dict(heappop(heap)[1:])
+        huffman = {}
+        while len(frecs) > 1:
+            a, n = frecs.pop(0)
+            b, m = frecs.pop(0)
 
-    # Paso 4: Codificar la cadena de entrada
-    # utilizando el diccionario de Huffman
-    encoded = ""
-    for char in text:
-        encoded += huffman_dict[char]
+            for x in a:
+                huffman[x] = "0" + huffman.get(x, "")
+            for x in b:
+                huffman[x] = "1" + huffman.get(x, "")
 
-    return encoded, huffman_dict
+            combined_freq = n + m
 
+            i = 0
+            while i < len(frecs) and combined_freq > frecs[i][1]:
+                i += 1
+            frecs.insert(i, ((a + b), combined_freq))
 
-def huffman_decoding(encoded, huffman_dict):
-    # Invertir el diccionario de Huffman para poder
-    # decodificar la cadena de entrada
-    inv_dict = {v: k for k, v in huffman_dict.items()}
+        encoded = "".join([huffman[x] for x in text])
 
-    # Decodificar la cadena de entrada utilizando
-    # el diccionario invertido
-    decoded = ""
-    code = ""
-    for bit in encoded:
-        code += bit
-        if code in inv_dict:
-            decoded += inv_dict[code]
-            code = ""
+        return encoded, huffman
 
-    return decoded
+    def huffman_decoding(self, encoded: bytes, huffman: dict) -> str:
+        huff_rev = {v: k for k, v in huffman.items()}
+
+        decoded = ""
+        i = 0
+        while i < len(encoded):
+            j = i + 1
+            while encoded[i:j] not in huff_rev:
+                j += 1
+            decoded += huff_rev[encoded[i:j]]
+            i = j
+
+        return decoded
 
 
 FREQ = {"A": 5, "B": 12, "C": 35, "D": 3, "E": 8, "F": 14, "G": 21, "H": 1, "I": 39}
 TEXT = "".join([x * y for x, y in FREQ.items()])
 print("Original:\t", TEXT)
 
-enc, huff = huffman_encoding(TEXT)
-dec = huffman_decoding(enc, huff)
-print("Huffman:\t", dec)
-print("Are they the same? ", TEXT==dec)
+hf = Huffman()
+enc, huff = hf.huffman_encoding(TEXT)
+print("Huffman:\t", huff)
+dec = hf.huffman_decoding(enc, huff)
+print("Decoded:\t", dec)
+print("Are they the same? ", TEXT == dec)
