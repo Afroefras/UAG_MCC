@@ -4,6 +4,7 @@ class Sudoku:
 
     def read_sudoku(self, sudoku: list) -> None:
         self.sudoku = sudoku
+        self.n_chunks = len(self.sudoku)
 
     def __str__(self) -> str:
         to_print = ""
@@ -22,6 +23,29 @@ class Sudoku:
 
         to_print = to_print.replace("0", " ")
         return to_print
+    
+    def is_row_legal(self, to_check: int, n_row: int) -> bool:
+        n_row = n_row // 3
+        all_rows = set(range(9))
+        full_row = filter(lambda x: x // 3 == n_row, all_rows)
+
+        for row_pos in full_row:
+            if to_check in self.sudoku[row_pos]:
+                return False
+
+        return True
+    
+    def is_col_legal(self, to_check: int, n_col: int) -> bool:
+        col_pos = n_col // 3
+        chunks_pos = filter(lambda x: x % 3 == n_col, range(self.n_chunks))
+
+        for chunk_pos in chunks_pos:
+            chunk = self.sudoku[chunk_pos]
+            print(chunk_pos, chunk, col_pos)
+            if to_check == chunk[col_pos]:
+                return False
+
+        return True
 
     def solve_sudoku(self) -> None:
         pass
@@ -61,3 +85,6 @@ SUDOKU = [
 sk = Sudoku()
 sk.read_sudoku(SUDOKU)
 print(sk)
+
+a = sk.is_col_legal(4, 0)
+print(a)
