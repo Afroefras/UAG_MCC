@@ -1,10 +1,16 @@
+from numpy import array
+
+
 class Sudoku:
     def __init__(self) -> None:
         self.num = set(range(1, 10))
 
     def read_sudoku(self, sudoku: list) -> None:
-        self.sudoku = sudoku
+        self.original = array(sudoku)
+        self.sudoku = self.original.copy()
+
         self.n_chunks = len(self.sudoku)
+        self.chunks = set(range(self.n_chunks))
 
     def __str__(self) -> str:
         to_print = ""
@@ -23,28 +29,50 @@ class Sudoku:
 
         to_print = to_print.replace("0", " ")
         return to_print
-    
-    def is_row_legal(self, to_check: int, n_row: int) -> bool:
-        n_row = n_row // 3
-        all_rows = set(range(9))
-        full_row = filter(lambda x: x // 3 == n_row, all_rows)
 
-        for row_pos in full_row:
-            if to_check in self.sudoku[row_pos]:
-                return False
+    def chain(self, *iterables):
+        for it in iterables:
+            for each in it:
+                yield each
+
+    def is_row_legal(self, to_check: int, n_row: int) -> bool:
+        row_start = n_row * 3
+        row_end = row_start + 3
+
+        full_row = self.sudoku[row_start:row_end]
+        full_row = self.chain(*full_row)
+
+        if to_check in full_row:
+            return False
 
         return True
-    
+
     def is_col_legal(self, to_check: int, n_col: int) -> bool:
         col_pos = n_col // 3
-        chunks_pos = filter(lambda x: x % 3 == n_col, range(self.n_chunks))
+        chunks_pos = filter(lambda x: x % 3 == col_pos, self.chunks)
+        chunks = self.sudoku[list(chunks_pos)]
 
-        for chunk_pos in chunks_pos:
-            chunk = self.sudoku[chunk_pos]
-            print(chunk_pos, chunk, col_pos)
-            if to_check == chunk[col_pos]:
-                return False
+        col_mod = n_col % 3
+        if to_check in {x[col_mod] for x in chunks}:
+            return False
 
+        return True
+
+    def is_group_legal(self, to_check: int, n_row: int, n_col: int) -> bool:
+        col_pos = n_col // 3
+        chunks_pos = filter(lambda x: x % 3 == col_pos, self.chunks)
+        chunks = self.sudoku[list(chunks_pos)]
+
+        row_pos = n_row // 3
+        row_start = row_pos * 3
+        row_end = row_start + 3
+
+        group = chunks[row_start:row_end]
+        group = self.chain(*group)
+
+        if to_check in group:
+            return False
+        
         return True
 
     def solve_sudoku(self) -> None:
@@ -86,5 +114,7 @@ sk = Sudoku()
 sk.read_sudoku(SUDOKU)
 print(sk)
 
-a = sk.is_col_legal(4, 0)
-print(a)
+for x in range(9):
+    for y in range(9):
+        a = sk.is_group_legal(1, x, y)
+        if not a: print(f'{x}, {y}: {a}')
