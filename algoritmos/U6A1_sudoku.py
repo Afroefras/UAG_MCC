@@ -9,9 +9,6 @@ class Sudoku:
         self.original = array(sudoku)
         self.sudoku = self.original.copy()
 
-        self.n_chunks = len(self.sudoku)
-        self.chunks = set(range(self.n_chunks))
-
     def __str__(self) -> str:
         to_print = "-" * 30
         to_print += "\n"
@@ -26,7 +23,8 @@ class Sudoku:
             if (i + 1) % 3 == 0:
                 to_print += "-" * 30
                 to_print += "\n"
-
+        
+        to_print = to_print.replace('0', ' ')
         return to_print
 
     def chain(self, *iterables):
@@ -35,48 +33,35 @@ class Sudoku:
                 yield each
 
     def is_row_legal(self, to_check: int, n_row: int) -> bool:
-        row_start = n_row * 3
-        row_end = row_start + 3
-
-        full_row = self.sudoku[row_start:row_end]
-        full_row = self.chain(*full_row)
-
-        if to_check in full_row:
+        if to_check in self.sudoku[n_row]:
             return False
-
+        
         return True
 
     def is_col_legal(self, to_check: int, n_col: int) -> bool:
-        col_pos = n_col // 3
-        chunks_pos = filter(lambda x: x % 3 == col_pos, self.chunks)
-        chunks = self.sudoku[list(chunks_pos)]
-
-        col_mod = n_col % 3
-        if to_check in {x[col_mod] for x in chunks}:
+        if to_check in {x[n_col] for x in self.sudoku}:
             return False
-
+        
         return True
 
     def is_group_legal(self, to_check: int, n_row: int, n_col: int) -> bool:
-        col_pos = n_col // 3
-        chunks_pos = filter(lambda x: x % 3 == col_pos, self.chunks)
-        chunks = self.sudoku[list(chunks_pos)]
-
-        row_pos = n_row // 3
-        row_start = row_pos * 3
+        row_start = (n_row // 3) * 3
         row_end = row_start + 3
 
-        group = chunks[row_start:row_end]
-        group = self.chain(*group)
+        rows = self.sudoku[row_start:row_end]
 
-        if to_check in group:
-            return False
+        col_start = (n_col // 3) * 3
+        col_end = col_start + 3
 
+        for row in rows:
+            print(row[col_start:col_end])
+            if to_check in row[col_start:col_end]:
+                return False
+            
         return True
 
     def solve_sudoku(self) -> None:
-        for chunk in self.sudoku:
-            pass
+        pass
 
 
 SUDOKU = [
@@ -94,5 +79,4 @@ SUDOKU = [
 
 sk = Sudoku()
 sk.read_sudoku(SUDOKU)
-print(sk.sudoku)
 print(sk)
