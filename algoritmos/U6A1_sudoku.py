@@ -23,25 +23,20 @@ class Sudoku:
             if (i + 1) % 3 == 0:
                 to_print += "-" * 30
                 to_print += "\n"
-        
-        to_print = to_print.replace('0', ' ')
-        return to_print
 
-    def chain(self, *iterables):
-        for it in iterables:
-            for each in it:
-                yield each
+        to_print = to_print.replace("0", " ")
+        return to_print
 
     def is_row_legal(self, to_check: int, n_row: int) -> bool:
         if to_check in self.sudoku[n_row]:
             return False
-        
+
         return True
 
     def is_col_legal(self, to_check: int, n_col: int) -> bool:
         if to_check in {x[n_col] for x in self.sudoku}:
             return False
-        
+
         return True
 
     def is_group_legal(self, to_check: int, n_row: int, n_col: int) -> bool:
@@ -54,14 +49,21 @@ class Sudoku:
         col_end = col_start + 3
 
         for row in rows:
-            print(row[col_start:col_end])
             if to_check in row[col_start:col_end]:
                 return False
-            
+
         return True
 
-    def solve_sudoku(self) -> None:
-        pass
+    def solve_sudoku(self, i: int, j: int) -> None:
+        if self.original[i, j] == 0:
+            for x in self.num:
+
+                row_cond = self.is_row_legal(x, i)
+                col_cond = self.is_col_legal(x, j)
+                group_cond = self.is_group_legal(x, i, j)
+
+                if row_cond and col_cond and group_cond:
+                    pass
 
 
 SUDOKU = [
