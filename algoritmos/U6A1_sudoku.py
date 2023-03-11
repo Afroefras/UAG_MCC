@@ -32,9 +32,10 @@ class Sudoku:
         return to_print
 
     def is_row_legal(self, to_check: int, i: int) -> bool:
-        row_start = i // 9
+        row_start = (i // 9) * 9
         row_end = row_start + 9
 
+        print(row_start, row_end)
         print(self.sudoku[row_start:row_end])
         if to_check in self.sudoku[row_start:row_end]:
             return False
