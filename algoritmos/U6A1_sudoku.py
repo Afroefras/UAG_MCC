@@ -14,21 +14,29 @@ class Sudoku:
         to_print += "\n"
 
         for i, x in enumerate(self.sudoku):
-            for j, y in enumerate(x):
-                if j % 3 == 0:
-                    to_print += "|"
-                to_print += f" {y} "
+            i += 1
 
-            to_print += "|\n"
-            if (i + 1) % 3 == 0:
+            if i % 3 == 1:
+                to_print += "|"
+
+            to_print += f" {x} "
+
+            if i % 9 == 0:
+                to_print += "|\n"
+
+            if i % 27 == 0:
                 to_print += "-" * 30
                 to_print += "\n"
 
         to_print = to_print.replace("0", " ")
         return to_print
 
-    def is_row_legal(self, to_check: int, n_row: int) -> bool:
-        if to_check in self.sudoku[n_row]:
+    def is_row_legal(self, to_check: int, i: int) -> bool:
+        row_start = i // 9
+        row_end = row_start + 9
+
+        print(self.sudoku[row_start:row_end])
+        if to_check in self.sudoku[row_start:row_end]:
             return False
 
         return True
@@ -64,7 +72,7 @@ class Sudoku:
             a += 1
             b = 0
 
-        print(f'For i={i}, j={j} then a={a}, b={b}')
+        print(f"For i={i}, j={j} then a={a}, b={b}")
 
         if self.original[i, j] == 0:
             for x in self.num:
@@ -83,15 +91,87 @@ class Sudoku:
 
 
 SUDOKU = [
-    [5, 0, 0, 9, 1, 3, 7, 2, 0],
-    [3, 0, 0, 0, 8, 0, 5, 0, 9],
-    [0, 9, 0, 2, 5, 0, 0, 8, 0],
-    [6, 8, 0, 4, 7, 0, 2, 3, 0],
-    [0, 0, 9, 5, 0, 0, 4, 6, 0],
-    [7, 0, 4, 0, 0, 0, 0, 0, 5],
-    [0, 2, 0, 0, 0, 0, 0, 0, 0],
-    [4, 0, 0, 8, 9, 1, 6, 0, 0],
-    [8, 5, 0, 7, 2, 0, 0, 0, 3],
+    5,
+    0,
+    0,
+    9,
+    1,
+    3,
+    7,
+    2,
+    0,
+    3,
+    0,
+    0,
+    0,
+    8,
+    0,
+    5,
+    0,
+    9,
+    0,
+    9,
+    0,
+    2,
+    5,
+    0,
+    0,
+    8,
+    0,
+    6,
+    8,
+    0,
+    4,
+    7,
+    0,
+    2,
+    3,
+    0,
+    0,
+    0,
+    9,
+    5,
+    0,
+    0,
+    4,
+    6,
+    0,
+    7,
+    0,
+    4,
+    0,
+    0,
+    0,
+    0,
+    0,
+    5,
+    0,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    4,
+    0,
+    0,
+    8,
+    9,
+    1,
+    6,
+    0,
+    0,
+    8,
+    5,
+    0,
+    7,
+    2,
+    0,
+    0,
+    0,
+    3,
 ]
 
 
@@ -99,4 +179,7 @@ sk = Sudoku()
 sk.read_sudoku(SUDOKU)
 print(sk)
 
-sk.solve_sudoku(0, 0)
+for i in range(0, 100, 10):
+    a = sk.is_row_legal(4, i)
+    print(a)
+# sk.solve_sudoku(0, 0)
