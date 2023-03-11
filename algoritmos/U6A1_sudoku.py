@@ -55,15 +55,31 @@ class Sudoku:
         return True
 
     def solve_sudoku(self, i: int, j: int) -> None:
+        if i == j == 9 * 9:
+            return self.__str__()
+
+        a = i
+        b = j + 1
+        if b > 8:
+            a += 1
+            b = 0
+
+        print(f'For i={i}, j={j} then a={a}, b={b}')
+
         if self.original[i, j] == 0:
             for x in self.num:
 
-                row_cond = self.is_row_legal(x, i)
-                col_cond = self.is_col_legal(x, j)
-                group_cond = self.is_group_legal(x, i, j)
+                row = self.is_row_legal(x, i)
+                col = self.is_col_legal(x, j)
+                group = self.is_group_legal(x, i, j)
 
-                if row_cond and col_cond and group_cond:
-                    pass
+                if row and col and group:
+                    self.sudoku[i, j] = x
+                    print(self.__str__())
+
+                    self.solve_sudoku(a, b)
+        else:
+            self.solve_sudoku(a, b)
 
 
 SUDOKU = [
@@ -82,3 +98,5 @@ SUDOKU = [
 sk = Sudoku()
 sk.read_sudoku(SUDOKU)
 print(sk)
+
+sk.solve_sudoku(0, 0)
