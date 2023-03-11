@@ -35,15 +35,14 @@ class Sudoku:
         row_start = (i // 9) * 9
         row_end = row_start + 9
 
-        print(row_start, row_end)
-        print(self.sudoku[row_start:row_end])
         if to_check in self.sudoku[row_start:row_end]:
             return False
 
         return True
 
-    def is_col_legal(self, to_check: int, n_col: int) -> bool:
-        if to_check in {x[n_col] for x in self.sudoku}:
+    def is_col_legal(self, to_check: int, i: int) -> bool:
+        start = i // 9
+        if to_check in self.sudoku[start::9]:
             return False
 
         return True
@@ -180,7 +179,7 @@ sk = Sudoku()
 sk.read_sudoku(SUDOKU)
 print(sk)
 
-for i in range(0, 100, 10):
-    a = sk.is_row_legal(4, i)
+for i in range(0, 90, 10):
+    a = sk.is_col_legal(4, i)
     print(a)
 # sk.solve_sudoku(0, 0)
