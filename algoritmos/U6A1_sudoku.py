@@ -13,21 +13,20 @@ class Sudoku:
         self.chunks = set(range(self.n_chunks))
 
     def __str__(self) -> str:
-        to_print = ""
+        to_print = "-" * 30
+        to_print += "\n"
+
         for i, x in enumerate(self.sudoku):
-            if i % 3 == 0:
-                to_print += "\n| "
-            if i % 9 == 0:
-                to_print += "-" * 22
-                to_print += "\n| "
+            for j, y in enumerate(x):
+                if j % 3 == 0:
+                    to_print += "|"
+                to_print += f" {y} "
 
-            to_print += " ".join(map(str, x))
-            to_print += " | "
+            to_print += "|\n"
+            if (i + 1) % 3 == 0:
+                to_print += "-" * 30
+                to_print += "\n"
 
-        to_print += "\n  "
-        to_print += "-" * 22
-
-        to_print = to_print.replace("0", " ")
         return to_print
 
     def chain(self, *iterables):
@@ -72,7 +71,7 @@ class Sudoku:
 
         if to_check in group:
             return False
-        
+
         return True
 
     def solve_sudoku(self) -> None:
@@ -84,11 +83,9 @@ SUDOKU = [
     [5, 0, 0, 9, 1, 3, 7, 2, 0],
     [3, 0, 0, 0, 8, 0, 5, 0, 9],
     [0, 9, 0, 2, 5, 0, 0, 8, 0],
-    
     [6, 8, 0, 4, 7, 0, 2, 3, 0],
     [0, 0, 9, 5, 0, 0, 4, 6, 0],
     [7, 0, 4, 0, 0, 0, 0, 0, 5],
-    
     [0, 2, 0, 0, 0, 0, 0, 0, 0],
     [4, 0, 0, 8, 9, 1, 6, 0, 0],
     [8, 5, 0, 7, 2, 0, 0, 0, 3],
@@ -97,4 +94,5 @@ SUDOKU = [
 
 sk = Sudoku()
 sk.read_sudoku(SUDOKU)
+print(sk.sudoku)
 print(sk)
