@@ -1,4 +1,4 @@
-from numpy import array, concatenate
+from numpy import array
 
 
 class Sudoku:
@@ -30,11 +30,6 @@ class Sudoku:
 
         to_print = to_print.replace("0", " ")
         return to_print
-    
-    def chain(self, *iterables):
-        for it in iterables:
-            for each in it:
-                yield each
 
     def is_row_legal(self, to_check: int, i: int) -> bool:
         row_start = (i // 9) * 9
@@ -46,7 +41,8 @@ class Sudoku:
         return True
 
     def is_col_legal(self, to_check: int, i: int) -> bool:
-        col_start = i // 9
+        col_start = i % 9
+        print(i, self.sudoku[col_start::9])
         if to_check in self.sudoku[col_start::9]:
             return False
 
@@ -57,10 +53,10 @@ class Sudoku:
         row_end = row_start + 27
         group_rows = self.sudoku[row_start:row_end]
 
-        col_start = i // 9
-        group = group_rows[col_start::9]
-        group = concatenate((group, group_rows[col_start + 1::9]))
-        group = concatenate((group, group_rows[col_start + 2::9]))
+        col_start = ((i % 9) // 3) * 3
+        group = set(group_rows[col_start::9])
+        group.update(group_rows[col_start + 1 :: 9])
+        group.update(group_rows[col_start + 2 :: 9])
 
         print(group_rows)
         print(group)
@@ -186,7 +182,7 @@ sk = Sudoku()
 sk.read_sudoku(SUDOKU)
 print(sk)
 
-for i in range(27):
+for i in [11, 22, 33, 60, 80]:
     a = sk.is_group_legal(4, i)
     print(a)
 # sk.solve_sudoku(0, 0)
