@@ -9,11 +9,11 @@ class Sudoku:
         self.original = array(sudoku)
         self.sudoku = self.original.copy()
 
-    def __str__(self) -> str:
+    def __str__(self, sudoku: list) -> str:
         to_print = "-" * 30
         to_print += "\n"
 
-        for i, x in enumerate(self.sudoku):
+        for i, x in enumerate(sudoku):
             i += 1
 
             if i % 3 == 1:
@@ -31,7 +31,7 @@ class Sudoku:
         to_print = to_print.replace("0", " ")
         return to_print
 
-    def is_row_legal(self, to_check: int, i: int) -> bool:
+    def is_row(self, to_check: int, i: int) -> bool:
         row_start = (i // 9) * 9
         row_end = row_start + 9
 
@@ -40,15 +40,14 @@ class Sudoku:
 
         return True
 
-    def is_col_legal(self, to_check: int, i: int) -> bool:
+    def is_col(self, to_check: int, i: int) -> bool:
         col_start = i % 9
-        print(i, self.sudoku[col_start::9])
         if to_check in self.sudoku[col_start::9]:
             return False
 
         return True
 
-    def is_group_legal(self, to_check: int, i: int) -> bool:
+    def is_group(self, to_check: int, i: int) -> bool:
         row_start = (i // 27) * 27
         row_end = row_start + 27
         group_rows = self.sudoku[row_start:row_end]
@@ -58,39 +57,32 @@ class Sudoku:
         group.update(group_rows[col_start + 1 :: 9])
         group.update(group_rows[col_start + 2 :: 9])
 
-        print(group_rows)
-        print(group)
         if to_check in group:
             return False
 
         return True
 
-    def solve_sudoku(self, i: int, j: int) -> None:
-        if i == j == 9 * 9:
-            return self.__str__()
+    def is_legal(self, x: int, i: int) -> bool:
+        return self.is_group(x, i) and self.is_row(x, i) and self.is_col(x, i) 
 
-        a = i
-        b = j + 1
-        if b > 8:
-            a += 1
-            b = 0
+    def solve_sudoku(self, i: int) -> None:
+        if i < 0 or i > 80:
+            return self.__str__(self.sudoku)
 
-        print(f"For i={i}, j={j} then a={a}, b={b}")
+        prev_x = i - 1
+        next_x = i + 1
 
-        if self.original[i, j] == 0:
+        if self.original[i] == 0:
             for x in self.num:
+                if self.is_legal(x, i):
+                    self.solve_sudoku(next_x)
+                    self.sudoku[i] = x
+                    print(self.__str__(self.original))
+                    print(self.__str__(self.sudoku))
 
-                row = self.is_row_legal(x, i)
-                col = self.is_col_legal(x, j)
-                group = self.is_group_legal(x, i, j)
-
-                if row and col and group:
-                    self.sudoku[i, j] = x
-                    print(self.__str__())
-
-                    self.solve_sudoku(a, b)
+                    
         else:
-            self.solve_sudoku(a, b)
+            self.solve_sudoku(next_x)
 
 
 SUDOKU = [
@@ -180,9 +172,6 @@ SUDOKU = [
 
 sk = Sudoku()
 sk.read_sudoku(SUDOKU)
-print(sk)
 
-for i in [11, 22, 33, 60, 80]:
-    a = sk.is_group_legal(4, i)
-    print(a)
-# sk.solve_sudoku(0, 0)
+a = sk.solve_sudoku(0)
+print(a)
