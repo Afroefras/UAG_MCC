@@ -63,26 +63,26 @@ class Sudoku:
         return True
 
     def is_legal(self, x: int, i: int) -> bool:
-        return self.is_group(x, i) and self.is_row(x, i) and self.is_col(x, i) 
+        return self.is_group(x, i) and self.is_row(x, i) and self.is_col(x, i)
 
     def solve_sudoku(self, i: int) -> None:
-        if i < 0 or i > 80:
-            return self.__str__(self.sudoku)
+        a = f"Start i={i}: "
 
-        prev_x = i - 1
-        next_x = i + 1
-
+        next_i = i + 1
         if self.original[i] == 0:
             for x in self.num:
-                if self.is_legal(x, i):
-                    self.solve_sudoku(next_x)
+                legal = self.is_legal(x, i)
+                if legal and x > self.sudoku[i]:
+                    a += f"{x} assigned i={i} it was {self.sudoku[i]}, "
+                    print(a)
                     self.sudoku[i] = x
-                    print(self.__str__(self.original))
+                    self.solve_sudoku(next_i)
                     print(self.__str__(self.sudoku))
 
-                    
         else:
-            self.solve_sudoku(next_x)
+            self.solve_sudoku(next_i)
+
+        print(a)
 
 
 SUDOKU = [
@@ -169,9 +169,22 @@ SUDOKU = [
     3,
 ]
 
+# SUDOKU = [
+#     6,9,0,0,0,0,7,0,0,
+#     0,0,0,0,9,6,0,0,0,
+#     0,8,0,7,5,3,0,9,0,
+#     0,2,0,3,7,4,5,6,1,
+#     3,6,0,0,0,5,0,2,0,
+#     0,0,0,9,6,0,3,7,8,
+#     0,0,6,0,3,1,0,8,4,
+#     0,4,5,8,0,7,6,0,0,
+#     0,0,0,0,0,0,0,5,7,
+# ]
 
 sk = Sudoku()
 sk.read_sudoku(SUDOKU)
+a = sk.__str__(sk.original)
+print(a)
 
 a = sk.solve_sudoku(0)
 print(a)
