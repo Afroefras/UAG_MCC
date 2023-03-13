@@ -4,99 +4,264 @@ from numpy import array
 class Sudoku:
     def __init__(self) -> None:
         self.num = set(range(1, 10))
+        self.empty_loc = 0
 
     def read_sudoku(self, sudoku: list) -> None:
         self.original = array(sudoku)
         self.sudoku = self.original.copy()
+        self.n = list(range(len(self.sudoku)))
 
     def __str__(self) -> str:
         to_print = "-" * 30
         to_print += "\n"
 
         for i, x in enumerate(self.sudoku):
-            for j, y in enumerate(x):
-                if j % 3 == 0:
-                    to_print += "|"
-                to_print += f" {y} "
+            i += 1
 
-            to_print += "|\n"
-            if (i + 1) % 3 == 0:
+            if i % 3 == 1:
+                to_print += "|"
+
+            to_print += f" {x} "
+
+            if i % 9 == 0:
+                to_print += "|\n"
+
+            if i % 27 == 0:
                 to_print += "-" * 30
                 to_print += "\n"
 
         to_print = to_print.replace("0", " ")
         return to_print
 
-    def is_row_legal(self, to_check: int, n_row: int) -> bool:
-        if to_check in self.sudoku[n_row]:
+    def is_row(self, to_check: int, i: int) -> bool:
+        row_start = (i // 9) * 9
+        row_end = row_start + 9
+
+        if to_check in self.sudoku[row_start:row_end]:
             return False
 
         return True
 
-    def is_col_legal(self, to_check: int, n_col: int) -> bool:
-        if to_check in {x[n_col] for x in self.sudoku}:
+    def is_col(self, to_check: int, i: int) -> bool:
+        col_start = i % 9
+        if to_check in self.sudoku[col_start::9]:
             return False
 
         return True
 
-    def is_group_legal(self, to_check: int, n_row: int, n_col: int) -> bool:
-        row_start = (n_row // 3) * 3
-        row_end = row_start + 3
+    def is_group(self, to_check: int, i: int) -> bool:
+        row_start = (i // 27) * 27
+        row_end = row_start + 27
+        group_rows = self.sudoku[row_start:row_end]
 
-        rows = self.sudoku[row_start:row_end]
+        col_start = ((i % 9) // 3) * 3
+        group = set(group_rows[col_start::9])
+        group.update(group_rows[col_start + 1 :: 9])
+        group.update(group_rows[col_start + 2 :: 9])
 
-        col_start = (n_col // 3) * 3
-        col_end = col_start + 3
-
-        for row in rows:
-            if to_check in row[col_start:col_end]:
-                return False
+        if to_check in group:
+            return False
 
         return True
 
-    def solve_sudoku(self, i: int, j: int) -> None:
-        if i == j == 9 * 9:
-            return self.__str__()
+    def is_legal(self, x: int, i: int) -> bool:
+        return self.is_group(x, i) and self.is_row(x, i) and self.is_col(x, i)
 
-        a = i
-        b = j + 1
-        if b > 8:
-            a += 1
-            b = 0
+    def find_empty(self) -> bool:
+        for i in self.n:
+            if self.sudoku[i] == 0:
+                self.empty_loc = i
+                return True
+        return False
 
-        print(f'For i={i}, j={j} then a={a}, b={b}')
+    def solve_sudoku(self) -> None:
+        if not self.find_empty():
+            return True
 
-        if self.original[i, j] == 0:
-            for x in self.num:
+        i = self.empty_loc
 
-                row = self.is_row_legal(x, i)
-                col = self.is_col_legal(x, j)
-                group = self.is_group_legal(x, i, j)
+        for x in self.num:
+            if self.is_legal(x, i):
+                self.sudoku[i] = x
 
-                if row and col and group:
-                    self.sudoku[i, j] = x
-                    print(self.__str__())
+                if self.solve_sudoku():
+                    return True
 
-                    self.solve_sudoku(a, b)
-        else:
-            self.solve_sudoku(a, b)
+                self.sudoku[i] = 0
+        return False
 
 
 SUDOKU = [
-    [5, 0, 0, 9, 1, 3, 7, 2, 0],
-    [3, 0, 0, 0, 8, 0, 5, 0, 9],
-    [0, 9, 0, 2, 5, 0, 0, 8, 0],
-    [6, 8, 0, 4, 7, 0, 2, 3, 0],
-    [0, 0, 9, 5, 0, 0, 4, 6, 0],
-    [7, 0, 4, 0, 0, 0, 0, 0, 5],
-    [0, 2, 0, 0, 0, 0, 0, 0, 0],
-    [4, 0, 0, 8, 9, 1, 6, 0, 0],
-    [8, 5, 0, 7, 2, 0, 0, 0, 3],
+    5,
+    0,
+    0,
+    9,
+    1,
+    3,
+    7,
+    2,
+    0,
+    3,
+    0,
+    0,
+    0,
+    8,
+    0,
+    5,
+    0,
+    9,
+    0,
+    9,
+    0,
+    2,
+    5,
+    0,
+    0,
+    8,
+    0,
+    6,
+    8,
+    0,
+    4,
+    7,
+    0,
+    2,
+    3,
+    0,
+    0,
+    0,
+    9,
+    5,
+    0,
+    0,
+    4,
+    6,
+    0,
+    7,
+    0,
+    4,
+    0,
+    0,
+    0,
+    0,
+    0,
+    5,
+    0,
+    2,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    4,
+    0,
+    0,
+    8,
+    9,
+    1,
+    6,
+    0,
+    0,
+    8,
+    5,
+    0,
+    7,
+    2,
+    0,
+    0,
+    0,
+    3,
 ]
 
+SUDOKU = [
+    6,
+    9,
+    0,
+    0,
+    0,
+    0,
+    7,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    9,
+    6,
+    0,
+    0,
+    0,
+    0,
+    8,
+    0,
+    7,
+    5,
+    3,
+    0,
+    9,
+    0,
+    0,
+    2,
+    0,
+    3,
+    7,
+    4,
+    5,
+    6,
+    1,
+    3,
+    6,
+    0,
+    0,
+    0,
+    5,
+    0,
+    2,
+    0,
+    0,
+    0,
+    0,
+    9,
+    6,
+    0,
+    3,
+    7,
+    8,
+    0,
+    0,
+    6,
+    0,
+    3,
+    1,
+    0,
+    8,
+    4,
+    0,
+    4,
+    5,
+    8,
+    0,
+    7,
+    6,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    5,
+    7,
+]
 
 sk = Sudoku()
 sk.read_sudoku(SUDOKU)
 print(sk)
 
-sk.solve_sudoku(0, 0)
+sk.solve_sudoku()
+print(sk)
