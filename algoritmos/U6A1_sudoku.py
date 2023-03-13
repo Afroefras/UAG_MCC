@@ -4,16 +4,18 @@ from numpy import array
 class Sudoku:
     def __init__(self) -> None:
         self.num = set(range(1, 10))
+        self.empty_loc = 0
 
     def read_sudoku(self, sudoku: list) -> None:
         self.original = array(sudoku)
         self.sudoku = self.original.copy()
+        self.n = list(range(len(self.sudoku)))
 
-    def __str__(self, sudoku: list) -> str:
+    def __str__(self) -> str:
         to_print = "-" * 30
         to_print += "\n"
 
-        for i, x in enumerate(sudoku):
+        for i, x in enumerate(self.sudoku):
             i += 1
 
             if i % 3 == 1:
@@ -65,24 +67,28 @@ class Sudoku:
     def is_legal(self, x: int, i: int) -> bool:
         return self.is_group(x, i) and self.is_row(x, i) and self.is_col(x, i)
 
-    def solve_sudoku(self, i: int) -> None:
-        a = f"Start i={i}: "
+    def find_empty(self) -> bool:
+        for i in self.n:
+            if self.sudoku[i] == 0:
+                self.empty_loc = i
+                return True
+        return False
 
-        next_i = i + 1
-        if self.original[i] == 0:
-            for x in self.num:
-                legal = self.is_legal(x, i)
-                if legal and x > self.sudoku[i]:
-                    a += f"{x} assigned i={i} it was {self.sudoku[i]}, "
-                    print(a)
-                    self.sudoku[i] = x
-                    self.solve_sudoku(next_i)
-                    print(self.__str__(self.sudoku))
+    def solve_sudoku(self) -> None:
+        if not self.find_empty():
+            return True
 
-        else:
-            self.solve_sudoku(next_i)
+        i = self.empty_loc
 
-        print(a)
+        for x in self.num:
+            if self.is_legal(x, i):
+                self.sudoku[i] = x
+
+                if self.solve_sudoku():
+                    return True
+
+                self.sudoku[i] = 0
+        return False
 
 
 SUDOKU = [
@@ -169,22 +175,93 @@ SUDOKU = [
     3,
 ]
 
-# SUDOKU = [
-#     6,9,0,0,0,0,7,0,0,
-#     0,0,0,0,9,6,0,0,0,
-#     0,8,0,7,5,3,0,9,0,
-#     0,2,0,3,7,4,5,6,1,
-#     3,6,0,0,0,5,0,2,0,
-#     0,0,0,9,6,0,3,7,8,
-#     0,0,6,0,3,1,0,8,4,
-#     0,4,5,8,0,7,6,0,0,
-#     0,0,0,0,0,0,0,5,7,
-# ]
+SUDOKU = [
+    6,
+    9,
+    0,
+    0,
+    0,
+    0,
+    7,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    9,
+    6,
+    0,
+    0,
+    0,
+    0,
+    8,
+    0,
+    7,
+    5,
+    3,
+    0,
+    9,
+    0,
+    0,
+    2,
+    0,
+    3,
+    7,
+    4,
+    5,
+    6,
+    1,
+    3,
+    6,
+    0,
+    0,
+    0,
+    5,
+    0,
+    2,
+    0,
+    0,
+    0,
+    0,
+    9,
+    6,
+    0,
+    3,
+    7,
+    8,
+    0,
+    0,
+    6,
+    0,
+    3,
+    1,
+    0,
+    8,
+    4,
+    0,
+    4,
+    5,
+    8,
+    0,
+    7,
+    6,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    5,
+    7,
+]
 
 sk = Sudoku()
 sk.read_sudoku(SUDOKU)
-a = sk.__str__(sk.original)
-print(a)
+print(sk)
 
-a = sk.solve_sudoku(0)
-print(a)
+sk.solve_sudoku()
+print(sk)
