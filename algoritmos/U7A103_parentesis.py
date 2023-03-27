@@ -10,7 +10,7 @@ class MatrixParenthesis:
         else:
             # Se incluyen los paréntesis según la solución óptima
             return f"({self.print_parenthesis(s, i, s[i][j])} {self.print_parenthesis(s, s[i][j]+1, j)})"
-        
+
     def matrix_parenthesis(self, p: list) -> tuple:
         # Se calcula el número de matrices a multiplicar
         n = len(p) - 1
@@ -28,11 +28,11 @@ class MatrixParenthesis:
             m[i][i] = 0
 
         # Llenado de la tabla de valores mínimos y de la tabla de la solución óptima
-        # l representa la longitud de la cadena de matrices a considerar
-        for l in range(2, n + 1):
-            # Se consideran todas las posibles subcadenas de longitud l
-            for i in range(n - l + 1):
-                j = i + l - 1
+        # _len representa la longitud de la cadena de matrices a considerar
+        for _len in range(2, n + 1):
+            # Se consideran todas las posibles subcadenas de longitud _len
+            for i in range(n - _len + 1):
+                j = i + _len - 1
                 # Se calcula la solución óptima para cada subcadena considerada
 
                 for k in range(i, j):
@@ -49,7 +49,8 @@ class MatrixParenthesis:
 
         # Se devuelve el número mínimo de multiplicaciones escalares necesarias y
         # la solución óptima en forma de cadena de paréntesis
-        return m[0][n-1], self.print_parenthesis(s, 0, n-1)
+        return m[0][n - 1], self.print_parenthesis(s, 0, n - 1)
+
 
 P = [5, 10, 3, 12, 5, 50, 6]
 
