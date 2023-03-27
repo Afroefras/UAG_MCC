@@ -1,4 +1,4 @@
-def cut_rod(lengths, prices, n):
+def cortar_cuerda(lengths, prices, n):
     # Obtenemos la longitud de las listas de precios y longitudes
     m = len(lengths)
     # Inicializamos una matriz de tamaño (m+1) x (n+1) para almacenar los valores óptimos
@@ -46,5 +46,5 @@ PRICES = [1, 4, 10, 12, 15, 20, 21, 32, 31, 41, 51]
 ROD_LENGHT = 11
 
 
-result = cut_rod(LENGTHS, PRICES, ROD_LENGHT)
+result = cortar_cuerda(LENGTHS, PRICES, ROD_LENGHT)
 print(result)

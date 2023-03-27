@@ -1,18 +1,3 @@
-BAG_WEIGHT = 140
-OBJECTS = [
-    (79, 85),
-    (32, 26),
-    (47, 48),
-    (18, 21),
-    (26, 22),
-    (85, 95),
-    (33, 43),
-    (40, 45),
-    (45, 55),
-    (59, 52),
-]
-
-
 class Mochila:
     def __init__(self) -> None:
         pass
@@ -76,6 +61,20 @@ class Mochila:
         self.choose_objects()
         self.print_result()
 
+
+BAG_WEIGHT = 140
+OBJECTS = [
+    (79, 85),
+    (32, 26),
+    (47, 48),
+    (18, 21),
+    (26, 22),
+    (85, 95),
+    (33, 43),
+    (40, 45),
+    (45, 55),
+    (59, 52),
+]
 
 mch = Mochila()
 mch.solve(BAG_WEIGHT, OBJECTS)
