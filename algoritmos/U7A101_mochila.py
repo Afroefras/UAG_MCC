@@ -44,7 +44,6 @@ class Mochila:
             m -= 1
 
         self.chosen = list(filter(lambda x: x, items))
-        
 
     def print_result(self) -> None:
         locs, values_weights = zip(*self.chosen)

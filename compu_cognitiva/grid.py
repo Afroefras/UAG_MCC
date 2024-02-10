@@ -1,5 +1,6 @@
 import pygame as pg
 
+
 class Player:
     def __init__(self, surface, tile_size: int):
         self.surface = surface
@@ -22,12 +23,12 @@ class Player:
 
 class Game:
     def __init__(
-            self,
-            title: str,
-            tile_size: int,
-            tiles_horizontal: int,
-            tiles_vertical: int,
-        ):
+        self,
+        title: str,
+        tile_size: int,
+        tiles_horizontal: int,
+        tiles_vertical: int,
+    ):
         pg.init()
         self.clock = pg.time.Clock()
         pg.display.set_caption(title)
@@ -55,7 +56,12 @@ class Game:
                 pg.draw.rect(
                     self.surface,
                     (40, 40, 40),
-                    (row * self.tile_size, col * self.tile_size, self.tile_size, self.tile_size),
+                    (
+                        row * self.tile_size,
+                        col * self.tile_size,
+                        self.tile_size,
+                        self.tile_size,
+                    ),
                 )
         self.player.draw()
         for event in pg.event.get():
@@ -73,8 +79,8 @@ class Game:
 if __name__ == "__main__":
     mygame = Game(
         title="Robotina",
-        tile_size=35, # Tamaño de cada cuadrícula
+        tile_size=35,  # Tamaño de cada cuadrícula
         tiles_horizontal=30,
-        tiles_vertical=20
+        tiles_vertical=20,
     )
     mygame.main()

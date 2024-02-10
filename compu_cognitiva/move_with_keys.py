@@ -31,13 +31,15 @@ while running:
                 robotina_pos[1] -= 10  # Mover hacia arriba
             if event.key == pygame.K_DOWN:
                 robotina_pos[1] += 10  # Mover hacia abajo
-    
+
     # Rellenar el fondo
     screen.fill(BLACK)
-    
+
     # Dibujar la robotina
-    pygame.draw.rect(screen, WHITE, pygame.Rect(robotina_pos[0], robotina_pos[1], 20, 20))
-    
+    pygame.draw.rect(
+        screen, WHITE, pygame.Rect(robotina_pos[0], robotina_pos[1], 20, 20)
+    )
+
     # Actualizar la ventana
     pygame.display.flip()
 

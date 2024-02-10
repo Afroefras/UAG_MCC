@@ -14,7 +14,7 @@ ca = PlotCurveAdjFuzzyNet3D(
     x_range=[x for x in range(20)],
     y_range=[y for y in range(25)],
     mutation_allowed=True,
-    figsize=(11,7),
+    figsize=(11, 7),
 )
 
 # Variables ########################################################################
@@ -26,11 +26,11 @@ surface = ca.surface_values(func_to_eval)
 ca.train(
     actual_values=surface,
     scale_dict={
-        'M': 20,
-        'D': 100,
-        'P': 1,
-        'Q': 1,
-        'R': 1,
+        "M": 20,
+        "D": 100,
+        "P": 1,
+        "Q": 1,
+        "R": 1,
     },
     stop_at_n_same_error=25,
     mutation_rate=0.19,
@@ -40,7 +40,7 @@ ca.train(
 
 # Gráfica ##########################################################################
 anim = FuncAnimation(
-    ca.fig, 
+    ca.fig,
     # lambda x: ca.plot_curveadj(x, c='red', ls='dashed'),
     ca.plot_curveadj,
     frames=ca.n_gen,

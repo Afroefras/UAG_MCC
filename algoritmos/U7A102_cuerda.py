@@ -26,7 +26,7 @@ def cortar_cuerda(lengths, prices, n):
                 # del subproblema anterior
                 else:
                     dp[i][j] = dp[i - 1][j]
-                    
+
             # Si la longitud de la subcuerda es mayor a la longitud del problema actual,
             # entonces no podemos cortar la cuerda y simplemente usamos el valor óptimo
             # del subproblema anterior

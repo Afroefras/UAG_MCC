@@ -13,7 +13,7 @@ ca = PlotCurveAdjFuzzyNet(
     n_generations=200,
     range_considered=range(100),
     mutation_allowed=True,
-    figsize=(11,7),
+    figsize=(11, 7),
 )
 
 # Variables ########################################################################
@@ -31,8 +31,8 @@ ca.train(
 
 # Gráfica ##########################################################################
 anim = FuncAnimation(
-    ca.fig, 
-    lambda x: ca.plot_curveadj(x, c='red', ls='dashed'),
+    ca.fig,
+    lambda x: ca.plot_curveadj(x, c="red", ls="dashed"),
     frames=ca.n_gen,
     interval=200,
     repeat=False,
