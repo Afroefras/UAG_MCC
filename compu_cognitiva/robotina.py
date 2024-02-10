@@ -42,7 +42,7 @@ class Game:
         self.game_started = False
 
     def draw_button(self, text):
-        pg.draw.rect(self.surface, (255, 0, 0), self.start_button)
+        pg.draw.rect(self.surface, (51, 153, 255), self.start_button)
         font = pg.font.Font(None, 36)
         text_surf = font.render(text, True, (255, 255, 255))
         text_rect = text_surf.get_rect(center=self.start_button.center)
@@ -53,22 +53,19 @@ class Game:
             self.game_started = True
 
     def move_with_keys(self, event) -> None:
-        # Obtener la posición actual de la robotina, ajustando para obtener la esquina superior izquierda de la cuadrícula
         x, y = self.player.pos
         x -= self.tile_size // 2
         y -= self.tile_size // 2
 
-        # Mover la robotina con las flechas del teclado
         if event.key == pg.K_LEFT:
-            x = max(0, x - self.tile_size)  # Mover a la izquierda
+            x = max(0, x - self.tile_size)
         if event.key == pg.K_RIGHT:
-            x = min(self.tile_size * (self.tiles_horizontal - 1), x + self.tile_size)  # Mover a la derecha
+            x = min(self.tile_size * (self.tiles_horizontal - 1), x + self.tile_size)
         if event.key == pg.K_UP:
-            y = max(0, y - self.tile_size)  # Mover hacia arriba
+            y = max(0, y - self.tile_size)
         if event.key == pg.K_DOWN:
-            y = min(self.tile_size * (self.tiles_vertical - 1), y + self.tile_size)  # Mover hacia abajo
+            y = min(self.tile_size * (self.tiles_vertical - 1), y + self.tile_size)
 
-        # Asegurar que la robotina siempre se centre en una cuadrícula después de moverse
         self.player.pos = (x + self.tile_size // 2, y + self.tile_size // 2)
 
     def main(self):
@@ -115,7 +112,7 @@ class Game:
 if __name__ == "__main__":
     mygame = Game(
         title="Robotina",
-        tile_size=35, # Tamaño de cada cuadrícula
+        tile_size=22, # Tamaño de cada cuadrícula
         tiles_horizontal=30,
         tiles_vertical=20
     )
