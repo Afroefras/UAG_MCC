@@ -9,6 +9,7 @@ flake8 = "6.0.0"
 numpy = "1.24.1"
 matplotlib = "3.6.3"
 pillow-heif = "0.13.1"
+pygame = "*"
 
 [dev-packages]
 ipykernel = "*"
